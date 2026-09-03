@@ -42,6 +42,7 @@ table LegTweaksSettings {
 table SkeletonHeight {
     hmd_height: float32 = null;
     floor_height: float32 = null;
+    osc_rate: int32 = null;
 }
 
 /// Settings for the skeletal model.

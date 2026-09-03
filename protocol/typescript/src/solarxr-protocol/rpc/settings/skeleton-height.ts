@@ -32,8 +32,13 @@ floorHeight():number|null {
   return offset ? this.bb!.readFloat32(this.bb_pos + offset) : null;
 }
 
+oscRate():number|null {
+  const offset = this.bb!.__offset(this.bb_pos, 8);
+  return offset ? this.bb!.readInt32(this.bb_pos + offset) : null;
+}
+
 static startSkeletonHeight(builder:flatbuffers.Builder) {
-  builder.startObject(2);
+  builder.startObject(3);
 }
 
 static addHmdHeight(builder:flatbuffers.Builder, hmdHeight:number) {
@@ -44,24 +49,31 @@ static addFloorHeight(builder:flatbuffers.Builder, floorHeight:number) {
   builder.addFieldFloat32(1, floorHeight, 0);
 }
 
+static addOscRate(builder:flatbuffers.Builder, oscRate:number) {
+  builder.addFieldInt32(2, oscRate, 0);
+}
+
 static endSkeletonHeight(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createSkeletonHeight(builder:flatbuffers.Builder, hmdHeight:number|null, floorHeight:number|null):flatbuffers.Offset {
+static createSkeletonHeight(builder:flatbuffers.Builder, hmdHeight:number|null, floorHeight:number|null, oscRate:number|null = null):flatbuffers.Offset {
   SkeletonHeight.startSkeletonHeight(builder);
   if (hmdHeight !== null)
     SkeletonHeight.addHmdHeight(builder, hmdHeight);
   if (floorHeight !== null)
     SkeletonHeight.addFloorHeight(builder, floorHeight);
+  if (oscRate !== null)
+    SkeletonHeight.addOscRate(builder, oscRate);
   return SkeletonHeight.endSkeletonHeight(builder);
 }
 
 unpack(): SkeletonHeightT {
   return new SkeletonHeightT(
     this.hmdHeight(),
-    this.floorHeight()
+    this.floorHeight(),
+    this.oscRate()
   );
 }
 
@@ -69,20 +81,23 @@ unpack(): SkeletonHeightT {
 unpackTo(_o: SkeletonHeightT): void {
   _o.hmdHeight = this.hmdHeight();
   _o.floorHeight = this.floorHeight();
+  _o.oscRate = this.oscRate();
 }
 }
 
 export class SkeletonHeightT implements flatbuffers.IGeneratedObject {
 constructor(
   public hmdHeight: number|null = null,
-  public floorHeight: number|null = null
+  public floorHeight: number|null = null,
+  public oscRate: number|null = null
 ){}
 
 
 pack(builder:flatbuffers.Builder): flatbuffers.Offset {
   return SkeletonHeight.createSkeletonHeight(builder,
     this.hmdHeight,
-    this.floorHeight
+    this.floorHeight,
+    this.oscRate
   );
 }
 }

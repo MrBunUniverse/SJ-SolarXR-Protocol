@@ -19,19 +19,30 @@ public final class SkeletonHeight extends Table {
   public float hmdHeight() { int o = __offset(4); return o != 0 ? bb.getFloat(o + bb_pos) : 0f; }
   public boolean hasFloorHeight() { return 0 != __offset(6); }
   public float floorHeight() { int o = __offset(6); return o != 0 ? bb.getFloat(o + bb_pos) : 0f; }
+  public boolean hasOscRate() { return 0 != __offset(8); }
+  public int oscRate() { int o = __offset(8); return o != 0 ? bb.getInt(o + bb_pos) : 0; }
 
   public static int createSkeletonHeight(FlatBufferBuilder builder,
       float hmdHeight,
-      float floorHeight) {
-    builder.startTable(2);
+      float floorHeight,
+      int oscRate) {
+    builder.startTable(3);
+    SkeletonHeight.addOscRate(builder, oscRate);
     SkeletonHeight.addFloorHeight(builder, floorHeight);
     SkeletonHeight.addHmdHeight(builder, hmdHeight);
     return SkeletonHeight.endSkeletonHeight(builder);
   }
 
-  public static void startSkeletonHeight(FlatBufferBuilder builder) { builder.startTable(2); }
+  public static int createSkeletonHeight(FlatBufferBuilder builder,
+      float hmdHeight,
+      float floorHeight) {
+    return createSkeletonHeight(builder, hmdHeight, floorHeight, 0);
+  }
+
+  public static void startSkeletonHeight(FlatBufferBuilder builder) { builder.startTable(3); }
   public static void addHmdHeight(FlatBufferBuilder builder, float hmdHeight) { builder.addFloat(0, hmdHeight, 0f); }
   public static void addFloorHeight(FlatBufferBuilder builder, float floorHeight) { builder.addFloat(1, floorHeight, 0f); }
+  public static void addOscRate(FlatBufferBuilder builder, int oscRate) { builder.addInt(2, oscRate, 0); }
   public static int endSkeletonHeight(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
@@ -53,13 +64,16 @@ public final class SkeletonHeight extends Table {
     _o.setHmdHeight(_oHmdHeight);
     Float _oFloorHeight = hasFloorHeight() ? floorHeight() : null;
     _o.setFloorHeight(_oFloorHeight);
+    Integer _oOscRate = hasOscRate() ? oscRate() : null;
+    _o.setOscRate(_oOscRate);
   }
   public static int pack(FlatBufferBuilder builder, SkeletonHeightT _o) {
     if (_o == null) return 0;
     return createSkeletonHeight(
       builder,
-      _o.getHmdHeight(),
-      _o.getFloorHeight());
+      _o.getHmdHeight() != null ? _o.getHmdHeight() : 0f,
+      _o.getFloorHeight() != null ? _o.getFloorHeight() : 0f,
+      _o.getOscRate() != null ? _o.getOscRate() : 0);
   }
 }
 

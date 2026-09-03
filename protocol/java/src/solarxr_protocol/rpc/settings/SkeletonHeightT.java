@@ -10,6 +10,7 @@ import com.google.flatbuffers.*;
 public class SkeletonHeightT {
   private Float hmdHeight;
   private Float floorHeight;
+  private Integer oscRate;
 
   public Float getHmdHeight() { return hmdHeight; }
 
@@ -19,10 +20,15 @@ public class SkeletonHeightT {
 
   public void setFloorHeight(Float floorHeight) { this.floorHeight = floorHeight; }
 
+  public Integer getOscRate() { return oscRate; }
+
+  public void setOscRate(Integer oscRate) { this.oscRate = oscRate; }
+
 
   public SkeletonHeightT() {
     this.hmdHeight = null;
     this.floorHeight = null;
+    this.oscRate = null;
   }
 }
 
