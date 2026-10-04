@@ -22,6 +22,10 @@ public class TrackerInfoT {
   private boolean isHmd;
   private int magnetometer;
   private int dataSupport;
+  private float learnedDriftRateDegPerMin;
+  private long totalDriftObservations;
+  private boolean autoLearnDrift;
+  private String imuProfileOverride;
 
   public int getImuType() { return imuType; }
 
@@ -79,6 +83,22 @@ public class TrackerInfoT {
 
   public void setDataSupport(int dataSupport) { this.dataSupport = dataSupport; }
 
+  public float getLearnedDriftRateDegPerMin() { return learnedDriftRateDegPerMin; }
+
+  public void setLearnedDriftRateDegPerMin(float learnedDriftRateDegPerMin) { this.learnedDriftRateDegPerMin = learnedDriftRateDegPerMin; }
+
+  public long getTotalDriftObservations() { return totalDriftObservations; }
+
+  public void setTotalDriftObservations(long totalDriftObservations) { this.totalDriftObservations = totalDriftObservations; }
+
+  public boolean getAutoLearnDrift() { return autoLearnDrift; }
+
+  public void setAutoLearnDrift(boolean autoLearnDrift) { this.autoLearnDrift = autoLearnDrift; }
+
+  public String getImuProfileOverride() { return imuProfileOverride; }
+
+  public void setImuProfileOverride(String imuProfileOverride) { this.imuProfileOverride = imuProfileOverride; }
+
 
   public TrackerInfoT() {
     this.imuType = 0;
@@ -95,6 +115,10 @@ public class TrackerInfoT {
     this.isHmd = false;
     this.magnetometer = 0;
     this.dataSupport = 0;
+    this.learnedDriftRateDegPerMin = 0.0f;
+    this.totalDriftObservations = 0L;
+    this.autoLearnDrift = true;
+    this.imuProfileOverride = null;
   }
 }
 

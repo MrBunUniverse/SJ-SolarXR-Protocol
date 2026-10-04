@@ -11,6 +11,10 @@ public class SkeletonHeightT {
   private Float hmdHeight;
   private Float floorHeight;
   private Integer oscRate;
+  private Boolean chatboxEnabled;
+  private Boolean chatboxTrigger;
+  private String chatboxMessage;
+  private Boolean chatboxOnly;
 
   public Float getHmdHeight() { return hmdHeight; }
 
@@ -24,11 +28,31 @@ public class SkeletonHeightT {
 
   public void setOscRate(Integer oscRate) { this.oscRate = oscRate; }
 
+  public Boolean getChatboxEnabled() { return chatboxEnabled; }
+
+  public void setChatboxEnabled(Boolean chatboxEnabled) { this.chatboxEnabled = chatboxEnabled; }
+
+  public Boolean getChatboxTrigger() { return chatboxTrigger; }
+
+  public void setChatboxTrigger(Boolean chatboxTrigger) { this.chatboxTrigger = chatboxTrigger; }
+
+  public String getChatboxMessage() { return chatboxMessage; }
+
+  public void setChatboxMessage(String chatboxMessage) { this.chatboxMessage = chatboxMessage; }
+
+  public Boolean getChatboxOnly() { return chatboxOnly; }
+
+  public void setChatboxOnly(Boolean chatboxOnly) { this.chatboxOnly = chatboxOnly; }
+
 
   public SkeletonHeightT() {
     this.hmdHeight = null;
     this.floorHeight = null;
     this.oscRate = null;
+    this.chatboxEnabled = null;
+    this.chatboxTrigger = null;
+    this.chatboxMessage = null;
+    this.chatboxOnly = null;
   }
 }
 

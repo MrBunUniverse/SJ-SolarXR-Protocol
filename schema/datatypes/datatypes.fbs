@@ -61,7 +61,8 @@ enum FirmwareErrorCode: uint8 {
 enum FilteringType: uint8 {
 	NONE = 0,
 	SMOOTHING = 1,
-	PREDICTION = 2
+	PREDICTION = 2,
+	ADAPTIVE_HYBRID = 3
 }
 
 

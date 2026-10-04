@@ -92,8 +92,23 @@ public final class TrackerData extends Table {
    */
   public solarxr_protocol.data_feed.stay_aligned.StayAlignedTracker stayAligned() { return stayAligned(new solarxr_protocol.data_feed.stay_aligned.StayAlignedTracker()); }
   public solarxr_protocol.data_feed.stay_aligned.StayAlignedTracker stayAligned(solarxr_protocol.data_feed.stay_aligned.StayAlignedTracker obj) { int o = __offset(30); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  /**
+   * Server-side compensation and automatic reconnect alignment state.
+   */
+  public solarxr_protocol.data_feed.tracker.TrackerRecovery recovery() { return recovery(new solarxr_protocol.data_feed.tracker.TrackerRecovery()); }
+  public solarxr_protocol.data_feed.tracker.TrackerRecovery recovery(solarxr_protocol.data_feed.tracker.TrackerRecovery obj) { int o = __offset(32); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  /**
+   * Server-side persistent drift learner state.
+   */
+  public solarxr_protocol.data_feed.tracker.AdaptiveDriftState adaptiveDrift() { return adaptiveDrift(new solarxr_protocol.data_feed.tracker.AdaptiveDriftState()); }
+  public solarxr_protocol.data_feed.tracker.AdaptiveDriftState adaptiveDrift(solarxr_protocol.data_feed.tracker.AdaptiveDriftState obj) { int o = __offset(34); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  /**
+   * Timestamp-aware filter and packet-stream health.
+   */
+  public solarxr_protocol.data_feed.tracker.FilterHealth filterHealth() { return filterHealth(new solarxr_protocol.data_feed.tracker.FilterHealth()); }
+  public solarxr_protocol.data_feed.tracker.FilterHealth filterHealth(solarxr_protocol.data_feed.tracker.FilterHealth obj) { int o = __offset(36); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
 
-  public static void startTrackerData(FlatBufferBuilder builder) { builder.startTable(14); }
+  public static void startTrackerData(FlatBufferBuilder builder) { builder.startTable(17); }
   public static void addTrackerId(FlatBufferBuilder builder, int trackerIdOffset) { builder.addOffset(0, trackerIdOffset, 0); }
   public static void addInfo(FlatBufferBuilder builder, int infoOffset) { builder.addOffset(1, infoOffset, 0); }
   public static void addStatus(FlatBufferBuilder builder, int status) { builder.addByte(2, (byte) status, (byte) 0); }
@@ -108,6 +123,9 @@ public final class TrackerData extends Table {
   public static void addTps(FlatBufferBuilder builder, int tps) { builder.addShort(11, (short) tps, (short) 0); }
   public static void addRawMagneticVector(FlatBufferBuilder builder, int rawMagneticVectorOffset) { builder.addStruct(12, rawMagneticVectorOffset, 0); }
   public static void addStayAligned(FlatBufferBuilder builder, int stayAlignedOffset) { builder.addOffset(13, stayAlignedOffset, 0); }
+  public static void addRecovery(FlatBufferBuilder builder, int recoveryOffset) { builder.addOffset(14, recoveryOffset, 0); }
+  public static void addAdaptiveDrift(FlatBufferBuilder builder, int adaptiveDriftOffset) { builder.addOffset(15, adaptiveDriftOffset, 0); }
+  public static void addFilterHealth(FlatBufferBuilder builder, int filterHealthOffset) { builder.addOffset(16, filterHealthOffset, 0); }
   public static int endTrackerData(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
@@ -153,12 +171,21 @@ public final class TrackerData extends Table {
     else _o.setRawMagneticVector(null);
     if (stayAligned() != null) _o.setStayAligned(stayAligned().unpack());
     else _o.setStayAligned(null);
+    if (recovery() != null) _o.setRecovery(recovery().unpack());
+    else _o.setRecovery(null);
+    if (adaptiveDrift() != null) _o.setAdaptiveDrift(adaptiveDrift().unpack());
+    else _o.setAdaptiveDrift(null);
+    if (filterHealth() != null) _o.setFilterHealth(filterHealth().unpack());
+    else _o.setFilterHealth(null);
   }
   public static int pack(FlatBufferBuilder builder, TrackerDataT _o) {
     if (_o == null) return 0;
     int _trackerId = _o.getTrackerId() == null ? 0 : solarxr_protocol.datatypes.TrackerId.pack(builder, _o.getTrackerId());
     int _info = _o.getInfo() == null ? 0 : solarxr_protocol.data_feed.tracker.TrackerInfo.pack(builder, _o.getInfo());
     int _stayAligned = _o.getStayAligned() == null ? 0 : solarxr_protocol.data_feed.stay_aligned.StayAlignedTracker.pack(builder, _o.getStayAligned());
+    int _recovery = _o.getRecovery() == null ? 0 : solarxr_protocol.data_feed.tracker.TrackerRecovery.pack(builder, _o.getRecovery());
+    int _adaptiveDrift = _o.getAdaptiveDrift() == null ? 0 : solarxr_protocol.data_feed.tracker.AdaptiveDriftState.pack(builder, _o.getAdaptiveDrift());
+    int _filterHealth = _o.getFilterHealth() == null ? 0 : solarxr_protocol.data_feed.tracker.FilterHealth.pack(builder, _o.getFilterHealth());
     startTrackerData(builder);
     addTrackerId(builder, _trackerId);
     addInfo(builder, _info);
@@ -174,6 +201,9 @@ public final class TrackerData extends Table {
     if (_o.getTps() != null) { addTps(builder, _o.getTps()); }
     addRawMagneticVector(builder, solarxr_protocol.datatypes.math.Vec3f.pack(builder, _o.getRawMagneticVector()));
     addStayAligned(builder, _stayAligned);
+    addRecovery(builder, _recovery);
+    addAdaptiveDrift(builder, _adaptiveDrift);
+    addFilterHealth(builder, _filterHealth);
     return endTrackerData(builder);
   }
 }

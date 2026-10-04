@@ -184,6 +184,42 @@ class TrackerData : Table() {
             null
         }
     }
+    /**
+     * Server-side compensation and automatic reconnect alignment state.
+     */
+    val recovery : solarxr_protocol.data_feed.tracker.TrackerRecovery? get() = recovery(solarxr_protocol.data_feed.tracker.TrackerRecovery())
+    fun recovery(obj: solarxr_protocol.data_feed.tracker.TrackerRecovery) : solarxr_protocol.data_feed.tracker.TrackerRecovery? {
+        val o = __offset(32)
+        return if (o != 0) {
+            obj.__assign(__indirect(o + bb_pos), bb)
+        } else {
+            null
+        }
+    }
+    /**
+     * Server-side persistent drift learner state.
+     */
+    val adaptiveDrift : solarxr_protocol.data_feed.tracker.AdaptiveDriftState? get() = adaptiveDrift(solarxr_protocol.data_feed.tracker.AdaptiveDriftState())
+    fun adaptiveDrift(obj: solarxr_protocol.data_feed.tracker.AdaptiveDriftState) : solarxr_protocol.data_feed.tracker.AdaptiveDriftState? {
+        val o = __offset(34)
+        return if (o != 0) {
+            obj.__assign(__indirect(o + bb_pos), bb)
+        } else {
+            null
+        }
+    }
+    /**
+     * Timestamp-aware filter and packet-stream health.
+     */
+    val filterHealth : solarxr_protocol.data_feed.tracker.FilterHealth? get() = filterHealth(solarxr_protocol.data_feed.tracker.FilterHealth())
+    fun filterHealth(obj: solarxr_protocol.data_feed.tracker.FilterHealth) : solarxr_protocol.data_feed.tracker.FilterHealth? {
+        val o = __offset(36)
+        return if (o != 0) {
+            obj.__assign(__indirect(o + bb_pos), bb)
+        } else {
+            null
+        }
+    }
     companion object {
         @JvmStatic
         fun validateVersion() = Constants.FLATBUFFERS_22_10_26()
@@ -195,7 +231,7 @@ class TrackerData : Table() {
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
         @JvmStatic
-        fun startTrackerData(builder: FlatBufferBuilder) = builder.startTable(14)
+        fun startTrackerData(builder: FlatBufferBuilder) = builder.startTable(17)
         @JvmStatic
         fun addTrackerId(builder: FlatBufferBuilder, trackerId: Int) = builder.addOffset(0, trackerId, 0)
         @JvmStatic
@@ -224,6 +260,12 @@ class TrackerData : Table() {
         fun addRawMagneticVector(builder: FlatBufferBuilder, rawMagneticVector: Int) = builder.addStruct(12, rawMagneticVector, 0)
         @JvmStatic
         fun addStayAligned(builder: FlatBufferBuilder, stayAligned: Int) = builder.addOffset(13, stayAligned, 0)
+        @JvmStatic
+        fun addRecovery(builder: FlatBufferBuilder, recovery: Int) = builder.addOffset(14, recovery, 0)
+        @JvmStatic
+        fun addAdaptiveDrift(builder: FlatBufferBuilder, adaptiveDrift: Int) = builder.addOffset(15, adaptiveDrift, 0)
+        @JvmStatic
+        fun addFilterHealth(builder: FlatBufferBuilder, filterHealth: Int) = builder.addOffset(16, filterHealth, 0)
         @JvmStatic
         fun endTrackerData(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()

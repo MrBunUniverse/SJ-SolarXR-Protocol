@@ -51,6 +51,16 @@ class AssignTrackerRequest : Table() {
             val o = __offset(12)
             return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else false
         }
+    /**
+     * Optional server-owned IMU profile override. Null preserves the current value.
+     */
+    val imuProfileOverride : String?
+        get() {
+            val o = __offset(14)
+            return if (o != 0) __string(o + bb_pos) else null
+        }
+    val imuProfileOverrideAsByteBuffer : ByteBuffer get() = __vector_as_bytebuffer(14, 1)
+    fun imuProfileOverrideInByteBuffer(_bb: ByteBuffer) : ByteBuffer = __vector_in_bytebuffer(_bb, 14, 1)
     companion object {
         @JvmStatic
         fun validateVersion() = Constants.FLATBUFFERS_22_10_26()
@@ -62,7 +72,7 @@ class AssignTrackerRequest : Table() {
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
         @JvmStatic
-        fun startAssignTrackerRequest(builder: FlatBufferBuilder) = builder.startTable(5)
+        fun startAssignTrackerRequest(builder: FlatBufferBuilder) = builder.startTable(6)
         @JvmStatic
         fun addTrackerId(builder: FlatBufferBuilder, trackerId: Int) = builder.addOffset(0, trackerId, 0)
         @JvmStatic
@@ -73,6 +83,8 @@ class AssignTrackerRequest : Table() {
         fun addDisplayName(builder: FlatBufferBuilder, displayName: Int) = builder.addOffset(3, displayName, 0)
         @JvmStatic
         fun addAllowDriftCompensation(builder: FlatBufferBuilder, allowDriftCompensation: Boolean) = builder.addBoolean(4, allowDriftCompensation, false)
+        @JvmStatic
+        fun addImuProfileOverride(builder: FlatBufferBuilder, imuProfileOverride: Int) = builder.addOffset(5, imuProfileOverride, 0)
         @JvmStatic
         fun endAssignTrackerRequest(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()

@@ -41,6 +41,21 @@ class ResetsSettings : Table() {
             val o = __offset(12)
             return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else false
         }
+    val deadTrackerRecoveryEnabled : Boolean
+        get() {
+            val o = __offset(14)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else true
+        }
+    val recoveryChatboxNotifications : Boolean
+        get() {
+            val o = __offset(16)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else true
+        }
+    val recoverySettingsPresent : Boolean
+        get() {
+            val o = __offset(18)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else false
+        }
     companion object {
         @JvmStatic
         fun validateVersion() = Constants.FLATBUFFERS_22_10_26()
@@ -52,9 +67,12 @@ class ResetsSettings : Table() {
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
         @JvmStatic
-        fun createResetsSettings(builder: FlatBufferBuilder, resetMountingFeet: Boolean, armsMountingResetMode: UByte, yawResetSmoothTime: Float, saveMountingReset: Boolean, resetHmdPitch: Boolean) : Int {
-            builder.startTable(5)
+        fun createResetsSettings(builder: FlatBufferBuilder, resetMountingFeet: Boolean, armsMountingResetMode: UByte, yawResetSmoothTime: Float, saveMountingReset: Boolean, resetHmdPitch: Boolean, deadTrackerRecoveryEnabled: Boolean, recoveryChatboxNotifications: Boolean, recoverySettingsPresent: Boolean) : Int {
+            builder.startTable(8)
             addYawResetSmoothTime(builder, yawResetSmoothTime)
+            addRecoverySettingsPresent(builder, recoverySettingsPresent)
+            addRecoveryChatboxNotifications(builder, recoveryChatboxNotifications)
+            addDeadTrackerRecoveryEnabled(builder, deadTrackerRecoveryEnabled)
             addResetHmdPitch(builder, resetHmdPitch)
             addSaveMountingReset(builder, saveMountingReset)
             addArmsMountingResetMode(builder, armsMountingResetMode)
@@ -62,7 +80,7 @@ class ResetsSettings : Table() {
             return endResetsSettings(builder)
         }
         @JvmStatic
-        fun startResetsSettings(builder: FlatBufferBuilder) = builder.startTable(5)
+        fun startResetsSettings(builder: FlatBufferBuilder) = builder.startTable(8)
         @JvmStatic
         fun addResetMountingFeet(builder: FlatBufferBuilder, resetMountingFeet: Boolean) = builder.addBoolean(0, resetMountingFeet, false)
         @JvmStatic
@@ -73,6 +91,12 @@ class ResetsSettings : Table() {
         fun addSaveMountingReset(builder: FlatBufferBuilder, saveMountingReset: Boolean) = builder.addBoolean(3, saveMountingReset, false)
         @JvmStatic
         fun addResetHmdPitch(builder: FlatBufferBuilder, resetHmdPitch: Boolean) = builder.addBoolean(4, resetHmdPitch, false)
+        @JvmStatic
+        fun addDeadTrackerRecoveryEnabled(builder: FlatBufferBuilder, deadTrackerRecoveryEnabled: Boolean) = builder.addBoolean(5, deadTrackerRecoveryEnabled, true)
+        @JvmStatic
+        fun addRecoveryChatboxNotifications(builder: FlatBufferBuilder, recoveryChatboxNotifications: Boolean) = builder.addBoolean(6, recoveryChatboxNotifications, true)
+        @JvmStatic
+        fun addRecoverySettingsPresent(builder: FlatBufferBuilder, recoverySettingsPresent: Boolean) = builder.addBoolean(7, recoverySettingsPresent, false)
         @JvmStatic
         fun endResetsSettings(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()

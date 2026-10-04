@@ -2,6 +2,7 @@
 
 import * as flatbuffers from 'flatbuffers';
 
+import { TrackerId, TrackerIdT } from '../../solarxr-protocol/datatypes/tracker-id.js';
 
 
 export class ClearDriftCompensationRequest implements flatbuffers.IUnpackableObject<ClearDriftCompensationRequestT> {
@@ -22,8 +23,20 @@ static getSizePrefixedRootAsClearDriftCompensationRequest(bb:flatbuffers.ByteBuf
   return (obj || new ClearDriftCompensationRequest()).__init(bb.readInt32(bb.position()) + bb.position(), bb);
 }
 
+/**
+ * Optional tracker to clear. Null retains the legacy all-trackers behavior.
+ */
+trackerId(obj?:TrackerId):TrackerId|null {
+  const offset = this.bb!.__offset(this.bb_pos, 4);
+  return offset ? (obj || new TrackerId()).__init(this.bb!.__indirect(this.bb_pos + offset), this.bb!) : null;
+}
+
 static startClearDriftCompensationRequest(builder:flatbuffers.Builder) {
-  builder.startObject(0);
+  builder.startObject(1);
+}
+
+static addTrackerId(builder:flatbuffers.Builder, trackerIdOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(0, trackerIdOffset, 0);
 }
 
 static endClearDriftCompensationRequest(builder:flatbuffers.Builder):flatbuffers.Offset {
@@ -31,24 +44,35 @@ static endClearDriftCompensationRequest(builder:flatbuffers.Builder):flatbuffers
   return offset;
 }
 
-static createClearDriftCompensationRequest(builder:flatbuffers.Builder):flatbuffers.Offset {
+static createClearDriftCompensationRequest(builder:flatbuffers.Builder, trackerIdOffset:flatbuffers.Offset):flatbuffers.Offset {
   ClearDriftCompensationRequest.startClearDriftCompensationRequest(builder);
+  ClearDriftCompensationRequest.addTrackerId(builder, trackerIdOffset);
   return ClearDriftCompensationRequest.endClearDriftCompensationRequest(builder);
 }
 
 unpack(): ClearDriftCompensationRequestT {
-  return new ClearDriftCompensationRequestT();
+  return new ClearDriftCompensationRequestT(
+    (this.trackerId() !== null ? this.trackerId()!.unpack() : null)
+  );
 }
 
 
-unpackTo(_o: ClearDriftCompensationRequestT): void {}
+unpackTo(_o: ClearDriftCompensationRequestT): void {
+  _o.trackerId = (this.trackerId() !== null ? this.trackerId()!.unpack() : null);
+}
 }
 
 export class ClearDriftCompensationRequestT implements flatbuffers.IGeneratedObject {
-constructor(){}
+constructor(
+  public trackerId: TrackerIdT|null = null
+){}
 
 
 pack(builder:flatbuffers.Builder): flatbuffers.Offset {
-  return ClearDriftCompensationRequest.createClearDriftCompensationRequest(builder);
+  const trackerId = (this.trackerId !== null ? this.trackerId!.pack(builder) : 0);
+
+  return ClearDriftCompensationRequest.createClearDriftCompensationRequest(builder,
+    trackerId
+  );
 }
 }

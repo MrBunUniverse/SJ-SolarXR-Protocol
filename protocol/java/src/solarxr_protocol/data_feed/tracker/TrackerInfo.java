@@ -77,8 +77,26 @@ public final class TrackerInfo extends Table {
    * Indicates what type of data the tracker sends (note: it always ends up being rotation in the end)
    */
   public int dataSupport() { int o = __offset(30); return o != 0 ? bb.get(o + bb_pos) & 0xFF : 0; }
+  /**
+   * Signed learned yaw drift compensation rate in degrees per minute.
+   */
+  public float learnedDriftRateDegPerMin() { int o = __offset(32); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  /**
+   * Number of accepted drift observations used to update the learned rate.
+   */
+  public long totalDriftObservations() { int o = __offset(34); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
+   * Whether this tracker is currently allowed to learn drift across resets.
+   */
+  public boolean autoLearnDrift() { int o = __offset(36); return o != 0 ? 0!=bb.get(o + bb_pos) : true; }
+  /**
+   * Server-owned IMU profile override, or null for automatic detection.
+   */
+  public String imuProfileOverride() { int o = __offset(38); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer imuProfileOverrideAsByteBuffer() { return __vector_as_bytebuffer(38, 1); }
+  public ByteBuffer imuProfileOverrideInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 38, 1); }
 
-  public static void startTrackerInfo(FlatBufferBuilder builder) { builder.startTable(14); }
+  public static void startTrackerInfo(FlatBufferBuilder builder) { builder.startTable(18); }
   public static void addImuType(FlatBufferBuilder builder, int imuType) { builder.addShort(0, (short) imuType, (short) 0); }
   public static void addBodyPart(FlatBufferBuilder builder, int bodyPart) { builder.addByte(1, (byte) bodyPart, (byte) 0); }
   public static void addPollRate(FlatBufferBuilder builder, int pollRateOffset) { builder.addStruct(2, pollRateOffset, 0); }
@@ -93,6 +111,10 @@ public final class TrackerInfo extends Table {
   public static void addIsHmd(FlatBufferBuilder builder, boolean isHmd) { builder.addBoolean(11, isHmd, false); }
   public static void addMagnetometer(FlatBufferBuilder builder, int magnetometer) { builder.addByte(12, (byte) magnetometer, (byte) 0); }
   public static void addDataSupport(FlatBufferBuilder builder, int dataSupport) { builder.addByte(13, (byte) dataSupport, (byte) 0); }
+  public static void addLearnedDriftRateDegPerMin(FlatBufferBuilder builder, float learnedDriftRateDegPerMin) { builder.addFloat(14, learnedDriftRateDegPerMin, 0.0f); }
+  public static void addTotalDriftObservations(FlatBufferBuilder builder, long totalDriftObservations) { builder.addInt(15, (int) totalDriftObservations, (int) 0L); }
+  public static void addAutoLearnDrift(FlatBufferBuilder builder, boolean autoLearnDrift) { builder.addBoolean(16, autoLearnDrift, true); }
+  public static void addImuProfileOverride(FlatBufferBuilder builder, int imuProfileOverrideOffset) { builder.addOffset(17, imuProfileOverrideOffset, 0); }
   public static int endTrackerInfo(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
@@ -138,11 +160,20 @@ public final class TrackerInfo extends Table {
     _o.setMagnetometer(_oMagnetometer);
     int _oDataSupport = dataSupport();
     _o.setDataSupport(_oDataSupport);
+    float _oLearnedDriftRateDegPerMin = learnedDriftRateDegPerMin();
+    _o.setLearnedDriftRateDegPerMin(_oLearnedDriftRateDegPerMin);
+    long _oTotalDriftObservations = totalDriftObservations();
+    _o.setTotalDriftObservations(_oTotalDriftObservations);
+    boolean _oAutoLearnDrift = autoLearnDrift();
+    _o.setAutoLearnDrift(_oAutoLearnDrift);
+    String _oImuProfileOverride = imuProfileOverride();
+    _o.setImuProfileOverride(_oImuProfileOverride);
   }
   public static int pack(FlatBufferBuilder builder, TrackerInfoT _o) {
     if (_o == null) return 0;
     int _displayName = _o.getDisplayName() == null ? 0 : builder.createString(_o.getDisplayName());
     int _customName = _o.getCustomName() == null ? 0 : builder.createString(_o.getCustomName());
+    int _imuProfileOverride = _o.getImuProfileOverride() == null ? 0 : builder.createString(_o.getImuProfileOverride());
     startTrackerInfo(builder);
     addImuType(builder, _o.getImuType());
     addBodyPart(builder, _o.getBodyPart());
@@ -158,6 +189,10 @@ public final class TrackerInfo extends Table {
     addIsHmd(builder, _o.getIsHmd());
     addMagnetometer(builder, _o.getMagnetometer());
     addDataSupport(builder, _o.getDataSupport());
+    addLearnedDriftRateDegPerMin(builder, _o.getLearnedDriftRateDegPerMin());
+    addTotalDriftObservations(builder, _o.getTotalDriftObservations());
+    addAutoLearnDrift(builder, _o.getAutoLearnDrift());
+    addImuProfileOverride(builder, _imuProfileOverride);
     return endTrackerInfo(builder);
   }
 }

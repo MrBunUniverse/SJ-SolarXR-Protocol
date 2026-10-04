@@ -104,6 +104,7 @@ union RpcMessage {
     OpenUriRequest,
     OpenUriResponse,
     EnableSteamVRDriverRequest,
+    AdaptiveDriftControlRequest,
 }
 
 enum KeybindId: uint8 {
@@ -206,9 +207,28 @@ table AssignTrackerRequest {
     mounting_orientation: solarxr_protocol.datatypes.math.Quat;
     display_name: string;
     allow_drift_compensation: bool;
+    /// Optional server-owned IMU profile override. Null preserves the current value.
+    imu_profile_override: string;
 }
 
-table ClearDriftCompensationRequest {}
+table ClearDriftCompensationRequest {
+    /// Optional tracker to clear. Null retains the legacy all-trackers behavior.
+    tracker_id: solarxr_protocol.datatypes.TrackerId;
+}
+
+enum AdaptiveDriftAction: uint8 {
+    PAUSE_LEARNING,
+    RESUME_LEARNING,
+    CLEAR_MODEL,
+    RESTORE_PREVIOUS_MODEL,
+    ENABLE_CORRECTION,
+    DISABLE_CORRECTION
+}
+
+table AdaptiveDriftControlRequest {
+    tracker_id: solarxr_protocol.datatypes.TrackerId;
+    action: AdaptiveDriftAction;
+}
 
 // ---- Settings ----
 
@@ -373,6 +393,9 @@ table ResetsSettings {
     yaw_reset_smooth_time: float32;
     save_mounting_reset: bool;
     reset_hmd_pitch: bool;
+    dead_tracker_recovery_enabled: bool = true;
+    recovery_chatbox_notifications: bool = true;
+    recovery_settings_present: bool = false;
 }
 
 table StayAlignedSettings {

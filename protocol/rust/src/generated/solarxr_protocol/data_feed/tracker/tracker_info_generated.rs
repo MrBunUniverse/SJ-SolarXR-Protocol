@@ -40,6 +40,10 @@ impl<'a> TrackerInfo<'a> {
   pub const VT_IS_HMD: flatbuffers::VOffsetT = 26;
   pub const VT_MAGNETOMETER: flatbuffers::VOffsetT = 28;
   pub const VT_DATA_SUPPORT: flatbuffers::VOffsetT = 30;
+  pub const VT_LEARNED_DRIFT_RATE_DEG_PER_MIN: flatbuffers::VOffsetT = 32;
+  pub const VT_TOTAL_DRIFT_OBSERVATIONS: flatbuffers::VOffsetT = 34;
+  pub const VT_AUTO_LEARN_DRIFT: flatbuffers::VOffsetT = 36;
+  pub const VT_IMU_PROFILE_OVERRIDE: flatbuffers::VOffsetT = 38;
 
   #[inline]
   pub unsafe fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
@@ -51,12 +55,16 @@ impl<'a> TrackerInfo<'a> {
     args: &'args TrackerInfoArgs<'args>
   ) -> flatbuffers::WIPOffset<TrackerInfo<'bldr>> {
     let mut builder = TrackerInfoBuilder::new(_fbb);
+    if let Some(x) = args.imu_profile_override { builder.add_imu_profile_override(x); }
+    builder.add_total_drift_observations(args.total_drift_observations);
+    builder.add_learned_drift_rate_deg_per_min(args.learned_drift_rate_deg_per_min);
     if let Some(x) = args.mounting_reset_orientation { builder.add_mounting_reset_orientation(x); }
     if let Some(x) = args.custom_name { builder.add_custom_name(x); }
     if let Some(x) = args.display_name { builder.add_display_name(x); }
     if let Some(x) = args.mounting_orientation { builder.add_mounting_orientation(x); }
     if let Some(x) = args.poll_rate { builder.add_poll_rate(x); }
     builder.add_imu_type(args.imu_type);
+    builder.add_auto_learn_drift(args.auto_learn_drift);
     builder.add_data_support(args.data_support);
     builder.add_magnetometer(args.magnetometer);
     builder.add_is_hmd(args.is_hmd);
@@ -181,6 +189,38 @@ impl<'a> TrackerInfo<'a> {
     // which contains a valid value in this slot
     unsafe { self._tab.get::<super::super::datatypes::hardware_info::TrackerDataType>(TrackerInfo::VT_DATA_SUPPORT, Some(super::super::datatypes::hardware_info::TrackerDataType::ROTATION)).unwrap()}
   }
+  /// Signed learned yaw drift compensation rate in degrees per minute.
+  #[inline]
+  pub fn learned_drift_rate_deg_per_min(&self) -> f32 {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<f32>(TrackerInfo::VT_LEARNED_DRIFT_RATE_DEG_PER_MIN, Some(0.0)).unwrap()}
+  }
+  /// Number of accepted drift observations used to update the learned rate.
+  #[inline]
+  pub fn total_drift_observations(&self) -> u32 {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<u32>(TrackerInfo::VT_TOTAL_DRIFT_OBSERVATIONS, Some(0)).unwrap()}
+  }
+  /// Whether this tracker is currently allowed to learn drift across resets.
+  #[inline]
+  pub fn auto_learn_drift(&self) -> bool {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(TrackerInfo::VT_AUTO_LEARN_DRIFT, Some(true)).unwrap()}
+  }
+  /// Server-owned IMU profile override, or null for automatic detection.
+  #[inline]
+  pub fn imu_profile_override(&self) -> Option<&'a str> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<flatbuffers::ForwardsUOffset<&str>>(TrackerInfo::VT_IMU_PROFILE_OVERRIDE, None)}
+  }
 }
 
 impl flatbuffers::Verifiable for TrackerInfo<'_> {
@@ -204,6 +244,10 @@ impl flatbuffers::Verifiable for TrackerInfo<'_> {
      .visit_field::<bool>("is_hmd", Self::VT_IS_HMD, false)?
      .visit_field::<super::super::datatypes::MagnetometerStatus>("magnetometer", Self::VT_MAGNETOMETER, false)?
      .visit_field::<super::super::datatypes::hardware_info::TrackerDataType>("data_support", Self::VT_DATA_SUPPORT, false)?
+     .visit_field::<f32>("learned_drift_rate_deg_per_min", Self::VT_LEARNED_DRIFT_RATE_DEG_PER_MIN, false)?
+     .visit_field::<u32>("total_drift_observations", Self::VT_TOTAL_DRIFT_OBSERVATIONS, false)?
+     .visit_field::<bool>("auto_learn_drift", Self::VT_AUTO_LEARN_DRIFT, false)?
+     .visit_field::<flatbuffers::ForwardsUOffset<&str>>("imu_profile_override", Self::VT_IMU_PROFILE_OVERRIDE, false)?
      .finish();
     Ok(())
   }
@@ -223,6 +267,10 @@ pub struct TrackerInfoArgs<'a> {
     pub is_hmd: bool,
     pub magnetometer: super::super::datatypes::MagnetometerStatus,
     pub data_support: super::super::datatypes::hardware_info::TrackerDataType,
+    pub learned_drift_rate_deg_per_min: f32,
+    pub total_drift_observations: u32,
+    pub auto_learn_drift: bool,
+    pub imu_profile_override: Option<flatbuffers::WIPOffset<&'a str>>,
 }
 impl<'a> Default for TrackerInfoArgs<'a> {
   #[inline]
@@ -242,6 +290,10 @@ impl<'a> Default for TrackerInfoArgs<'a> {
       is_hmd: false,
       magnetometer: super::super::datatypes::MagnetometerStatus::NOT_SUPPORTED,
       data_support: super::super::datatypes::hardware_info::TrackerDataType::ROTATION,
+      learned_drift_rate_deg_per_min: 0.0,
+      total_drift_observations: 0,
+      auto_learn_drift: true,
+      imu_profile_override: None,
     }
   }
 }
@@ -308,6 +360,22 @@ impl<'a: 'b, 'b> TrackerInfoBuilder<'a, 'b> {
     self.fbb_.push_slot::<super::super::datatypes::hardware_info::TrackerDataType>(TrackerInfo::VT_DATA_SUPPORT, data_support, super::super::datatypes::hardware_info::TrackerDataType::ROTATION);
   }
   #[inline]
+  pub fn add_learned_drift_rate_deg_per_min(&mut self, learned_drift_rate_deg_per_min: f32) {
+    self.fbb_.push_slot::<f32>(TrackerInfo::VT_LEARNED_DRIFT_RATE_DEG_PER_MIN, learned_drift_rate_deg_per_min, 0.0);
+  }
+  #[inline]
+  pub fn add_total_drift_observations(&mut self, total_drift_observations: u32) {
+    self.fbb_.push_slot::<u32>(TrackerInfo::VT_TOTAL_DRIFT_OBSERVATIONS, total_drift_observations, 0);
+  }
+  #[inline]
+  pub fn add_auto_learn_drift(&mut self, auto_learn_drift: bool) {
+    self.fbb_.push_slot::<bool>(TrackerInfo::VT_AUTO_LEARN_DRIFT, auto_learn_drift, true);
+  }
+  #[inline]
+  pub fn add_imu_profile_override(&mut self, imu_profile_override: flatbuffers::WIPOffset<&'b  str>) {
+    self.fbb_.push_slot_always::<flatbuffers::WIPOffset<_>>(TrackerInfo::VT_IMU_PROFILE_OVERRIDE, imu_profile_override);
+  }
+  #[inline]
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TrackerInfoBuilder<'a, 'b> {
     let start = _fbb.start_table();
     TrackerInfoBuilder {
@@ -339,6 +407,10 @@ impl core::fmt::Debug for TrackerInfo<'_> {
       ds.field("is_hmd", &self.is_hmd());
       ds.field("magnetometer", &self.magnetometer());
       ds.field("data_support", &self.data_support());
+      ds.field("learned_drift_rate_deg_per_min", &self.learned_drift_rate_deg_per_min());
+      ds.field("total_drift_observations", &self.total_drift_observations());
+      ds.field("auto_learn_drift", &self.auto_learn_drift());
+      ds.field("imu_profile_override", &self.imu_profile_override());
       ds.finish()
   }
 }

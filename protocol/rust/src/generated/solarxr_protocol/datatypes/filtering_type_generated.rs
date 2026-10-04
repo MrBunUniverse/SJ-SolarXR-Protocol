@@ -12,13 +12,14 @@ use super::*;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
 pub const ENUM_MIN_FILTERING_TYPE: u8 = 0;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
-pub const ENUM_MAX_FILTERING_TYPE: u8 = 2;
+pub const ENUM_MAX_FILTERING_TYPE: u8 = 3;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
 #[allow(non_camel_case_types)]
-pub const ENUM_VALUES_FILTERING_TYPE: [FilteringType; 3] = [
+pub const ENUM_VALUES_FILTERING_TYPE: [FilteringType; 4] = [
   FilteringType::NONE,
   FilteringType::SMOOTHING,
   FilteringType::PREDICTION,
+  FilteringType::ADAPTIVE_HYBRID,
 ];
 
 /// Used for filtering tracker rotations in software
@@ -30,13 +31,15 @@ impl FilteringType {
   pub const NONE: Self = Self(0);
   pub const SMOOTHING: Self = Self(1);
   pub const PREDICTION: Self = Self(2);
+  pub const ADAPTIVE_HYBRID: Self = Self(3);
 
   pub const ENUM_MIN: u8 = 0;
-  pub const ENUM_MAX: u8 = 2;
+  pub const ENUM_MAX: u8 = 3;
   pub const ENUM_VALUES: &'static [Self] = &[
     Self::NONE,
     Self::SMOOTHING,
     Self::PREDICTION,
+    Self::ADAPTIVE_HYBRID,
   ];
   /// Returns the variant's name or "" if unknown.
   pub fn variant_name(self) -> Option<&'static str> {
@@ -44,6 +47,7 @@ impl FilteringType {
       Self::NONE => Some("NONE"),
       Self::SMOOTHING => Some("SMOOTHING"),
       Self::PREDICTION => Some("PREDICTION"),
+      Self::ADAPTIVE_HYBRID => Some("ADAPTIVE_HYBRID"),
       _ => None,
     }
   }

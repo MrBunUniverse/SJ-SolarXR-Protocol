@@ -44,6 +44,9 @@ impl<'a> TrackerData<'a> {
   pub const VT_TPS: flatbuffers::VOffsetT = 26;
   pub const VT_RAW_MAGNETIC_VECTOR: flatbuffers::VOffsetT = 28;
   pub const VT_STAY_ALIGNED: flatbuffers::VOffsetT = 30;
+  pub const VT_RECOVERY: flatbuffers::VOffsetT = 32;
+  pub const VT_ADAPTIVE_DRIFT: flatbuffers::VOffsetT = 34;
+  pub const VT_FILTER_HEALTH: flatbuffers::VOffsetT = 36;
 
   #[inline]
   pub unsafe fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
@@ -55,6 +58,9 @@ impl<'a> TrackerData<'a> {
     args: &'args TrackerDataArgs<'args>
   ) -> flatbuffers::WIPOffset<TrackerData<'bldr>> {
     let mut builder = TrackerDataBuilder::new(_fbb);
+    if let Some(x) = args.filter_health { builder.add_filter_health(x); }
+    if let Some(x) = args.adaptive_drift { builder.add_adaptive_drift(x); }
+    if let Some(x) = args.recovery { builder.add_recovery(x); }
     if let Some(x) = args.stay_aligned { builder.add_stay_aligned(x); }
     if let Some(x) = args.raw_magnetic_vector { builder.add_raw_magnetic_vector(x); }
     if let Some(x) = args.rotation_identity_adjusted { builder.add_rotation_identity_adjusted(x); }
@@ -192,6 +198,30 @@ impl<'a> TrackerData<'a> {
     // which contains a valid value in this slot
     unsafe { self._tab.get::<flatbuffers::ForwardsUOffset<super::stay_aligned::StayAlignedTracker>>(TrackerData::VT_STAY_ALIGNED, None)}
   }
+  /// Server-side compensation and automatic reconnect alignment state.
+  #[inline]
+  pub fn recovery(&self) -> Option<TrackerRecovery<'a>> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<flatbuffers::ForwardsUOffset<TrackerRecovery>>(TrackerData::VT_RECOVERY, None)}
+  }
+  /// Server-side persistent drift learner state.
+  #[inline]
+  pub fn adaptive_drift(&self) -> Option<AdaptiveDriftState<'a>> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<flatbuffers::ForwardsUOffset<AdaptiveDriftState>>(TrackerData::VT_ADAPTIVE_DRIFT, None)}
+  }
+  /// Timestamp-aware filter and packet-stream health.
+  #[inline]
+  pub fn filter_health(&self) -> Option<FilterHealth<'a>> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<flatbuffers::ForwardsUOffset<FilterHealth>>(TrackerData::VT_FILTER_HEALTH, None)}
+  }
 }
 
 impl flatbuffers::Verifiable for TrackerData<'_> {
@@ -215,6 +245,9 @@ impl flatbuffers::Verifiable for TrackerData<'_> {
      .visit_field::<u16>("tps", Self::VT_TPS, false)?
      .visit_field::<super::super::datatypes::math::Vec3f>("raw_magnetic_vector", Self::VT_RAW_MAGNETIC_VECTOR, false)?
      .visit_field::<flatbuffers::ForwardsUOffset<super::stay_aligned::StayAlignedTracker>>("stay_aligned", Self::VT_STAY_ALIGNED, false)?
+     .visit_field::<flatbuffers::ForwardsUOffset<TrackerRecovery>>("recovery", Self::VT_RECOVERY, false)?
+     .visit_field::<flatbuffers::ForwardsUOffset<AdaptiveDriftState>>("adaptive_drift", Self::VT_ADAPTIVE_DRIFT, false)?
+     .visit_field::<flatbuffers::ForwardsUOffset<FilterHealth>>("filter_health", Self::VT_FILTER_HEALTH, false)?
      .finish();
     Ok(())
   }
@@ -234,6 +267,9 @@ pub struct TrackerDataArgs<'a> {
     pub tps: Option<u16>,
     pub raw_magnetic_vector: Option<&'a super::super::datatypes::math::Vec3f>,
     pub stay_aligned: Option<flatbuffers::WIPOffset<super::stay_aligned::StayAlignedTracker<'a>>>,
+    pub recovery: Option<flatbuffers::WIPOffset<TrackerRecovery<'a>>>,
+    pub adaptive_drift: Option<flatbuffers::WIPOffset<AdaptiveDriftState<'a>>>,
+    pub filter_health: Option<flatbuffers::WIPOffset<FilterHealth<'a>>>,
 }
 impl<'a> Default for TrackerDataArgs<'a> {
   #[inline]
@@ -253,6 +289,9 @@ impl<'a> Default for TrackerDataArgs<'a> {
       tps: None,
       raw_magnetic_vector: None,
       stay_aligned: None,
+      recovery: None,
+      adaptive_drift: None,
+      filter_health: None,
     }
   }
 }
@@ -319,6 +358,18 @@ impl<'a: 'b, 'b> TrackerDataBuilder<'a, 'b> {
     self.fbb_.push_slot_always::<flatbuffers::WIPOffset<super::stay_aligned::StayAlignedTracker>>(TrackerData::VT_STAY_ALIGNED, stay_aligned);
   }
   #[inline]
+  pub fn add_recovery(&mut self, recovery: flatbuffers::WIPOffset<TrackerRecovery<'b >>) {
+    self.fbb_.push_slot_always::<flatbuffers::WIPOffset<TrackerRecovery>>(TrackerData::VT_RECOVERY, recovery);
+  }
+  #[inline]
+  pub fn add_adaptive_drift(&mut self, adaptive_drift: flatbuffers::WIPOffset<AdaptiveDriftState<'b >>) {
+    self.fbb_.push_slot_always::<flatbuffers::WIPOffset<AdaptiveDriftState>>(TrackerData::VT_ADAPTIVE_DRIFT, adaptive_drift);
+  }
+  #[inline]
+  pub fn add_filter_health(&mut self, filter_health: flatbuffers::WIPOffset<FilterHealth<'b >>) {
+    self.fbb_.push_slot_always::<flatbuffers::WIPOffset<FilterHealth>>(TrackerData::VT_FILTER_HEALTH, filter_health);
+  }
+  #[inline]
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TrackerDataBuilder<'a, 'b> {
     let start = _fbb.start_table();
     TrackerDataBuilder {
@@ -350,6 +401,9 @@ impl core::fmt::Debug for TrackerData<'_> {
       ds.field("tps", &self.tps());
       ds.field("raw_magnetic_vector", &self.raw_magnetic_vector());
       ds.field("stay_aligned", &self.stay_aligned());
+      ds.field("recovery", &self.recovery());
+      ds.field("adaptive_drift", &self.adaptive_drift());
+      ds.field("filter_health", &self.filter_health());
       ds.finish()
   }
 }

@@ -48,8 +48,23 @@ resetHmdPitch():boolean {
   return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
 }
 
+deadTrackerRecoveryEnabled():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 14);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : true;
+}
+
+recoveryChatboxNotifications():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 16);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : true;
+}
+
+recoverySettingsPresent():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 18);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
+}
+
 static startResetsSettings(builder:flatbuffers.Builder) {
-  builder.startObject(5);
+  builder.startObject(8);
 }
 
 static addResetMountingFeet(builder:flatbuffers.Builder, resetMountingFeet:boolean) {
@@ -72,18 +87,33 @@ static addResetHmdPitch(builder:flatbuffers.Builder, resetHmdPitch:boolean) {
   builder.addFieldInt8(4, +resetHmdPitch, +false);
 }
 
+static addDeadTrackerRecoveryEnabled(builder:flatbuffers.Builder, deadTrackerRecoveryEnabled:boolean) {
+  builder.addFieldInt8(5, +deadTrackerRecoveryEnabled, +true);
+}
+
+static addRecoveryChatboxNotifications(builder:flatbuffers.Builder, recoveryChatboxNotifications:boolean) {
+  builder.addFieldInt8(6, +recoveryChatboxNotifications, +true);
+}
+
+static addRecoverySettingsPresent(builder:flatbuffers.Builder, recoverySettingsPresent:boolean) {
+  builder.addFieldInt8(7, +recoverySettingsPresent, +false);
+}
+
 static endResetsSettings(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createResetsSettings(builder:flatbuffers.Builder, resetMountingFeet:boolean, armsMountingResetMode:ArmsMountingResetMode, yawResetSmoothTime:number, saveMountingReset:boolean, resetHmdPitch:boolean):flatbuffers.Offset {
+static createResetsSettings(builder:flatbuffers.Builder, resetMountingFeet:boolean, armsMountingResetMode:ArmsMountingResetMode, yawResetSmoothTime:number, saveMountingReset:boolean, resetHmdPitch:boolean, deadTrackerRecoveryEnabled:boolean, recoveryChatboxNotifications:boolean, recoverySettingsPresent:boolean):flatbuffers.Offset {
   ResetsSettings.startResetsSettings(builder);
   ResetsSettings.addResetMountingFeet(builder, resetMountingFeet);
   ResetsSettings.addArmsMountingResetMode(builder, armsMountingResetMode);
   ResetsSettings.addYawResetSmoothTime(builder, yawResetSmoothTime);
   ResetsSettings.addSaveMountingReset(builder, saveMountingReset);
   ResetsSettings.addResetHmdPitch(builder, resetHmdPitch);
+  ResetsSettings.addDeadTrackerRecoveryEnabled(builder, deadTrackerRecoveryEnabled);
+  ResetsSettings.addRecoveryChatboxNotifications(builder, recoveryChatboxNotifications);
+  ResetsSettings.addRecoverySettingsPresent(builder, recoverySettingsPresent);
   return ResetsSettings.endResetsSettings(builder);
 }
 
@@ -93,7 +123,10 @@ unpack(): ResetsSettingsT {
     this.armsMountingResetMode(),
     this.yawResetSmoothTime(),
     this.saveMountingReset(),
-    this.resetHmdPitch()
+    this.resetHmdPitch(),
+    this.deadTrackerRecoveryEnabled(),
+    this.recoveryChatboxNotifications(),
+    this.recoverySettingsPresent()
   );
 }
 
@@ -104,6 +137,9 @@ unpackTo(_o: ResetsSettingsT): void {
   _o.yawResetSmoothTime = this.yawResetSmoothTime();
   _o.saveMountingReset = this.saveMountingReset();
   _o.resetHmdPitch = this.resetHmdPitch();
+  _o.deadTrackerRecoveryEnabled = this.deadTrackerRecoveryEnabled();
+  _o.recoveryChatboxNotifications = this.recoveryChatboxNotifications();
+  _o.recoverySettingsPresent = this.recoverySettingsPresent();
 }
 }
 
@@ -113,7 +149,10 @@ constructor(
   public armsMountingResetMode: ArmsMountingResetMode = ArmsMountingResetMode.BACK,
   public yawResetSmoothTime: number = 0.0,
   public saveMountingReset: boolean = false,
-  public resetHmdPitch: boolean = false
+  public resetHmdPitch: boolean = false,
+  public deadTrackerRecoveryEnabled: boolean = true,
+  public recoveryChatboxNotifications: boolean = true,
+  public recoverySettingsPresent: boolean = false
 ){}
 
 
@@ -123,7 +162,10 @@ pack(builder:flatbuffers.Builder): flatbuffers.Offset {
     this.armsMountingResetMode,
     this.yawResetSmoothTime,
     this.saveMountingReset,
-    this.resetHmdPitch
+    this.resetHmdPitch,
+    this.deadTrackerRecoveryEnabled,
+    this.recoveryChatboxNotifications,
+    this.recoverySettingsPresent
   );
 }
 }

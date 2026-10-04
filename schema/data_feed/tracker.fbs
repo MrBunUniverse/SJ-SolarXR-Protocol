@@ -4,6 +4,73 @@ include "stay_aligned.fbs";
 
 namespace solarxr_protocol.data_feed.tracker;
 
+enum TrackerRecoveryState: uint8 {
+    NONE,
+    BRIDGING_GAP,
+    COMPENSATING,
+    WAITING_FOR_STILLNESS,
+    VALIDATING,
+    BLENDING,
+    NEEDS_RESET
+}
+
+enum TrackerRecoveryReason: uint8 {
+    NONE,
+    TRACKER_OFFLINE,
+    TRACKER_MOVING,
+    POOR_PACKET_RATE,
+    NO_REFERENCE,
+    REFERENCE_DISAGREEMENT,
+    ROLE_OR_MOUNTING_CHANGED,
+    INVALID_ROTATION
+}
+
+table TrackerRecovery {
+    state: TrackerRecoveryState;
+    progress: float32;
+    confidence: float32;
+    reason: TrackerRecoveryReason;
+}
+
+enum AdaptiveDriftMode: uint8 {
+    DISABLED,
+    MONITORING,
+    LEARNING,
+    APPLIED,
+    FROZEN,
+    RECOVERING
+}
+
+enum AdaptiveDriftFreezeReason: uint8 {
+    NONE,
+    NO_REFERENCE,
+    MOVING,
+    PACKET_QUALITY,
+    REFERENCE_DISAGREEMENT,
+    LOW_CONFIDENCE,
+    RECOVERY,
+    PAUSED
+}
+
+table AdaptiveDriftState {
+    mode: AdaptiveDriftMode;
+    confidence: float32;
+    stable_duration_ms: uint64;
+    learned_rate_deg_per_min: float32;
+    applied_correction_deg: float32;
+    accepted_observations: uint32;
+    freeze_reason: AdaptiveDriftFreezeReason;
+}
+
+table FilterHealth {
+    input_rate_hz: float32;
+    packet_jitter_ms: float32;
+    packet_loss: float32;
+    prediction_horizon_ms: float32;
+    effective_latency_ms: float32;
+    filtering_impact_rad: float32;
+}
+
 /// Describes all possible information about a tracker. A tracker is anything that
 /// provides kinematic data about a particular body part.
 ///
@@ -55,6 +122,15 @@ table TrackerData {
 
     /// Stay Aligned
     stay_aligned: solarxr_protocol.data_feed.stay_aligned.StayAlignedTracker;
+
+    /// Server-side compensation and automatic reconnect alignment state.
+    recovery: TrackerRecovery;
+
+    /// Server-side persistent drift learner state.
+    adaptive_drift: AdaptiveDriftState;
+
+    /// Timestamp-aware filter and packet-stream health.
+    filter_health: FilterHealth;
 }
 
 /// A mask of the different components in `TrackerComponent`
@@ -72,6 +148,9 @@ table TrackerDataMask {
     tps: bool;
     raw_magnetic_vector: bool;
     stay_aligned: bool;
+    recovery: bool;
+    adaptive_drift: bool;
+    filter_health: bool;
 }
 
 /// Static description of a tracker
@@ -114,4 +193,16 @@ table TrackerInfo {
 
     /// Indicates what type of data the tracker sends (note: it always ends up being rotation in the end)
     data_support: solarxr_protocol.datatypes.hardware_info.TrackerDataType;
+
+    /// Signed learned yaw drift compensation rate in degrees per minute.
+    learned_drift_rate_deg_per_min: float32;
+
+    /// Number of accepted drift observations used to update the learned rate.
+    total_drift_observations: uint32;
+
+    /// Whether this tracker is currently allowed to learn drift across resets.
+    auto_learn_drift: bool = true;
+
+    /// Server-owned IMU profile override, or null for automatic detection.
+    imu_profile_override: string;
 }

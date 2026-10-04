@@ -1359,6 +1359,21 @@ impl<'a> RpcMessageHeader<'a> {
     }
   }
 
+  #[inline]
+  #[allow(non_snake_case)]
+  pub fn message_as_adaptive_drift_control_request(&self) -> Option<AdaptiveDriftControlRequest<'a>> {
+    if self.message_type() == RpcMessage::AdaptiveDriftControlRequest {
+      self.message().map(|t| {
+       // Safety:
+       // Created from a valid Table for this object
+       // Which contains a valid union in this slot
+       unsafe { AdaptiveDriftControlRequest::init_from_table(t) }
+     })
+    } else {
+      None
+    }
+  }
+
 }
 
 impl flatbuffers::Verifiable for RpcMessageHeader<'_> {
@@ -1457,6 +1472,7 @@ impl flatbuffers::Verifiable for RpcMessageHeader<'_> {
           RpcMessage::OpenUriRequest => v.verify_union_variant::<flatbuffers::ForwardsUOffset<OpenUriRequest>>("RpcMessage::OpenUriRequest", pos),
           RpcMessage::OpenUriResponse => v.verify_union_variant::<flatbuffers::ForwardsUOffset<OpenUriResponse>>("RpcMessage::OpenUriResponse", pos),
           RpcMessage::EnableSteamVRDriverRequest => v.verify_union_variant::<flatbuffers::ForwardsUOffset<EnableSteamVRDriverRequest>>("RpcMessage::EnableSteamVRDriverRequest", pos),
+          RpcMessage::AdaptiveDriftControlRequest => v.verify_union_variant::<flatbuffers::ForwardsUOffset<AdaptiveDriftControlRequest>>("RpcMessage::AdaptiveDriftControlRequest", pos),
           _ => Ok(()),
         }
      })?
@@ -2115,6 +2131,13 @@ impl core::fmt::Debug for RpcMessageHeader<'_> {
         },
         RpcMessage::EnableSteamVRDriverRequest => {
           if let Some(x) = self.message_as_enable_steam_vrdriver_request() {
+            ds.field("message", &x)
+          } else {
+            ds.field("message", &"InvalidFlatbuffer: Union discriminant does not match value.")
+          }
+        },
+        RpcMessage::AdaptiveDriftControlRequest => {
+          if let Some(x) = self.message_as_adaptive_drift_control_request() {
             ds.field("message", &x)
           } else {
             ds.field("message", &"InvalidFlatbuffer: Union discriminant does not match value.")

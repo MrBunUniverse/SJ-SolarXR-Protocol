@@ -30,6 +30,9 @@ impl<'a> ResetsSettings<'a> {
   pub const VT_YAW_RESET_SMOOTH_TIME: flatbuffers::VOffsetT = 8;
   pub const VT_SAVE_MOUNTING_RESET: flatbuffers::VOffsetT = 10;
   pub const VT_RESET_HMD_PITCH: flatbuffers::VOffsetT = 12;
+  pub const VT_DEAD_TRACKER_RECOVERY_ENABLED: flatbuffers::VOffsetT = 14;
+  pub const VT_RECOVERY_CHATBOX_NOTIFICATIONS: flatbuffers::VOffsetT = 16;
+  pub const VT_RECOVERY_SETTINGS_PRESENT: flatbuffers::VOffsetT = 18;
 
   #[inline]
   pub unsafe fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
@@ -42,6 +45,9 @@ impl<'a> ResetsSettings<'a> {
   ) -> flatbuffers::WIPOffset<ResetsSettings<'bldr>> {
     let mut builder = ResetsSettingsBuilder::new(_fbb);
     builder.add_yaw_reset_smooth_time(args.yaw_reset_smooth_time);
+    builder.add_recovery_settings_present(args.recovery_settings_present);
+    builder.add_recovery_chatbox_notifications(args.recovery_chatbox_notifications);
+    builder.add_dead_tracker_recovery_enabled(args.dead_tracker_recovery_enabled);
     builder.add_reset_hmd_pitch(args.reset_hmd_pitch);
     builder.add_save_mounting_reset(args.save_mounting_reset);
     builder.add_arms_mounting_reset_mode(args.arms_mounting_reset_mode);
@@ -85,6 +91,27 @@ impl<'a> ResetsSettings<'a> {
     // which contains a valid value in this slot
     unsafe { self._tab.get::<bool>(ResetsSettings::VT_RESET_HMD_PITCH, Some(false)).unwrap()}
   }
+  #[inline]
+  pub fn dead_tracker_recovery_enabled(&self) -> bool {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(ResetsSettings::VT_DEAD_TRACKER_RECOVERY_ENABLED, Some(true)).unwrap()}
+  }
+  #[inline]
+  pub fn recovery_chatbox_notifications(&self) -> bool {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(ResetsSettings::VT_RECOVERY_CHATBOX_NOTIFICATIONS, Some(true)).unwrap()}
+  }
+  #[inline]
+  pub fn recovery_settings_present(&self) -> bool {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(ResetsSettings::VT_RECOVERY_SETTINGS_PRESENT, Some(false)).unwrap()}
+  }
 }
 
 impl flatbuffers::Verifiable for ResetsSettings<'_> {
@@ -99,6 +126,9 @@ impl flatbuffers::Verifiable for ResetsSettings<'_> {
      .visit_field::<f32>("yaw_reset_smooth_time", Self::VT_YAW_RESET_SMOOTH_TIME, false)?
      .visit_field::<bool>("save_mounting_reset", Self::VT_SAVE_MOUNTING_RESET, false)?
      .visit_field::<bool>("reset_hmd_pitch", Self::VT_RESET_HMD_PITCH, false)?
+     .visit_field::<bool>("dead_tracker_recovery_enabled", Self::VT_DEAD_TRACKER_RECOVERY_ENABLED, false)?
+     .visit_field::<bool>("recovery_chatbox_notifications", Self::VT_RECOVERY_CHATBOX_NOTIFICATIONS, false)?
+     .visit_field::<bool>("recovery_settings_present", Self::VT_RECOVERY_SETTINGS_PRESENT, false)?
      .finish();
     Ok(())
   }
@@ -109,6 +139,9 @@ pub struct ResetsSettingsArgs {
     pub yaw_reset_smooth_time: f32,
     pub save_mounting_reset: bool,
     pub reset_hmd_pitch: bool,
+    pub dead_tracker_recovery_enabled: bool,
+    pub recovery_chatbox_notifications: bool,
+    pub recovery_settings_present: bool,
 }
 impl<'a> Default for ResetsSettingsArgs {
   #[inline]
@@ -119,6 +152,9 @@ impl<'a> Default for ResetsSettingsArgs {
       yaw_reset_smooth_time: 0.0,
       save_mounting_reset: false,
       reset_hmd_pitch: false,
+      dead_tracker_recovery_enabled: true,
+      recovery_chatbox_notifications: true,
+      recovery_settings_present: false,
     }
   }
 }
@@ -149,6 +185,18 @@ impl<'a: 'b, 'b> ResetsSettingsBuilder<'a, 'b> {
     self.fbb_.push_slot::<bool>(ResetsSettings::VT_RESET_HMD_PITCH, reset_hmd_pitch, false);
   }
   #[inline]
+  pub fn add_dead_tracker_recovery_enabled(&mut self, dead_tracker_recovery_enabled: bool) {
+    self.fbb_.push_slot::<bool>(ResetsSettings::VT_DEAD_TRACKER_RECOVERY_ENABLED, dead_tracker_recovery_enabled, true);
+  }
+  #[inline]
+  pub fn add_recovery_chatbox_notifications(&mut self, recovery_chatbox_notifications: bool) {
+    self.fbb_.push_slot::<bool>(ResetsSettings::VT_RECOVERY_CHATBOX_NOTIFICATIONS, recovery_chatbox_notifications, true);
+  }
+  #[inline]
+  pub fn add_recovery_settings_present(&mut self, recovery_settings_present: bool) {
+    self.fbb_.push_slot::<bool>(ResetsSettings::VT_RECOVERY_SETTINGS_PRESENT, recovery_settings_present, false);
+  }
+  #[inline]
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> ResetsSettingsBuilder<'a, 'b> {
     let start = _fbb.start_table();
     ResetsSettingsBuilder {
@@ -171,6 +219,9 @@ impl core::fmt::Debug for ResetsSettings<'_> {
       ds.field("yaw_reset_smooth_time", &self.yaw_reset_smooth_time());
       ds.field("save_mounting_reset", &self.save_mounting_reset());
       ds.field("reset_hmd_pitch", &self.reset_hmd_pitch());
+      ds.field("dead_tracker_recovery_enabled", &self.dead_tracker_recovery_enabled());
+      ds.field("recovery_chatbox_notifications", &self.recovery_chatbox_notifications());
+      ds.field("recovery_settings_present", &self.recovery_settings_present());
       ds.finish()
   }
 }

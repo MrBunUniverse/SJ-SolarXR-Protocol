@@ -21,28 +21,43 @@ public final class SkeletonHeight extends Table {
   public float floorHeight() { int o = __offset(6); return o != 0 ? bb.getFloat(o + bb_pos) : 0f; }
   public boolean hasOscRate() { return 0 != __offset(8); }
   public int oscRate() { int o = __offset(8); return o != 0 ? bb.getInt(o + bb_pos) : 0; }
+  public boolean hasChatboxEnabled() { return 0 != __offset(10); }
+  public boolean chatboxEnabled() { int o = __offset(10); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public boolean hasChatboxTrigger() { return 0 != __offset(12); }
+  public boolean chatboxTrigger() { int o = __offset(12); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public String chatboxMessage() { int o = __offset(14); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer chatboxMessageAsByteBuffer() { return __vector_as_bytebuffer(14, 1); }
+  public ByteBuffer chatboxMessageInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 14, 1); }
+  public boolean hasChatboxOnly() { return 0 != __offset(16); }
+  public boolean chatboxOnly() { int o = __offset(16); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
 
   public static int createSkeletonHeight(FlatBufferBuilder builder,
       float hmdHeight,
       float floorHeight,
-      int oscRate) {
-    builder.startTable(3);
+      int oscRate,
+      boolean chatboxEnabled,
+      boolean chatboxTrigger,
+      int chatboxMessageOffset,
+      boolean chatboxOnly) {
+    builder.startTable(7);
+    SkeletonHeight.addChatboxMessage(builder, chatboxMessageOffset);
     SkeletonHeight.addOscRate(builder, oscRate);
     SkeletonHeight.addFloorHeight(builder, floorHeight);
     SkeletonHeight.addHmdHeight(builder, hmdHeight);
+    SkeletonHeight.addChatboxOnly(builder, chatboxOnly);
+    SkeletonHeight.addChatboxTrigger(builder, chatboxTrigger);
+    SkeletonHeight.addChatboxEnabled(builder, chatboxEnabled);
     return SkeletonHeight.endSkeletonHeight(builder);
   }
 
-  public static int createSkeletonHeight(FlatBufferBuilder builder,
-      float hmdHeight,
-      float floorHeight) {
-    return createSkeletonHeight(builder, hmdHeight, floorHeight, 0);
-  }
-
-  public static void startSkeletonHeight(FlatBufferBuilder builder) { builder.startTable(3); }
+  public static void startSkeletonHeight(FlatBufferBuilder builder) { builder.startTable(7); }
   public static void addHmdHeight(FlatBufferBuilder builder, float hmdHeight) { builder.addFloat(0, hmdHeight, 0f); }
   public static void addFloorHeight(FlatBufferBuilder builder, float floorHeight) { builder.addFloat(1, floorHeight, 0f); }
   public static void addOscRate(FlatBufferBuilder builder, int oscRate) { builder.addInt(2, oscRate, 0); }
+  public static void addChatboxEnabled(FlatBufferBuilder builder, boolean chatboxEnabled) { builder.addBoolean(3, chatboxEnabled, false); }
+  public static void addChatboxTrigger(FlatBufferBuilder builder, boolean chatboxTrigger) { builder.addBoolean(4, chatboxTrigger, false); }
+  public static void addChatboxMessage(FlatBufferBuilder builder, int chatboxMessageOffset) { builder.addOffset(5, chatboxMessageOffset, 0); }
+  public static void addChatboxOnly(FlatBufferBuilder builder, boolean chatboxOnly) { builder.addBoolean(6, chatboxOnly, false); }
   public static int endSkeletonHeight(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
@@ -66,14 +81,27 @@ public final class SkeletonHeight extends Table {
     _o.setFloorHeight(_oFloorHeight);
     Integer _oOscRate = hasOscRate() ? oscRate() : null;
     _o.setOscRate(_oOscRate);
+    Boolean _oChatboxEnabled = hasChatboxEnabled() ? chatboxEnabled() : null;
+    _o.setChatboxEnabled(_oChatboxEnabled);
+    Boolean _oChatboxTrigger = hasChatboxTrigger() ? chatboxTrigger() : null;
+    _o.setChatboxTrigger(_oChatboxTrigger);
+    String _oChatboxMessage = chatboxMessage();
+    _o.setChatboxMessage(_oChatboxMessage);
+    Boolean _oChatboxOnly = hasChatboxOnly() ? chatboxOnly() : null;
+    _o.setChatboxOnly(_oChatboxOnly);
   }
   public static int pack(FlatBufferBuilder builder, SkeletonHeightT _o) {
     if (_o == null) return 0;
+    int _chatboxMessage = _o.getChatboxMessage() == null ? 0 : builder.createString(_o.getChatboxMessage());
     return createSkeletonHeight(
       builder,
-      _o.getHmdHeight() != null ? _o.getHmdHeight() : 0f,
-      _o.getFloorHeight() != null ? _o.getFloorHeight() : 0f,
-      _o.getOscRate() != null ? _o.getOscRate() : 0);
+      _o.getHmdHeight(),
+      _o.getFloorHeight(),
+      _o.getOscRate(),
+      _o.getChatboxEnabled(),
+      _o.getChatboxTrigger(),
+      _chatboxMessage,
+      _o.getChatboxOnly());
   }
 }
 

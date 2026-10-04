@@ -43,6 +43,10 @@ table SkeletonHeight {
     hmd_height: float32 = null;
     floor_height: float32 = null;
     osc_rate: int32 = null;
+    chatbox_enabled: bool = null;
+    chatbox_trigger: bool = null;
+    chatbox_message: string;
+    chatbox_only: bool = null;
 }
 
 /// Settings for the skeletal model.

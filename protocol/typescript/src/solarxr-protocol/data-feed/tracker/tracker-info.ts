@@ -143,8 +143,42 @@ dataSupport():TrackerDataType {
   return offset ? this.bb!.readUint8(this.bb_pos + offset) : TrackerDataType.ROTATION;
 }
 
+/**
+ * Signed learned yaw drift compensation rate in degrees per minute.
+ */
+learnedDriftRateDegPerMin():number {
+  const offset = this.bb!.__offset(this.bb_pos, 32);
+  return offset ? this.bb!.readFloat32(this.bb_pos + offset) : 0.0;
+}
+
+/**
+ * Number of accepted drift observations used to update the learned rate.
+ */
+totalDriftObservations():number {
+  const offset = this.bb!.__offset(this.bb_pos, 34);
+  return offset ? this.bb!.readUint32(this.bb_pos + offset) : 0;
+}
+
+/**
+ * Whether this tracker is currently allowed to learn drift across resets.
+ */
+autoLearnDrift():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 36);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : true;
+}
+
+/**
+ * Server-owned IMU profile override, or null for automatic detection.
+ */
+imuProfileOverride():string|null
+imuProfileOverride(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
+imuProfileOverride(optionalEncoding?:any):string|Uint8Array|null {
+  const offset = this.bb!.__offset(this.bb_pos, 38);
+  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+}
+
 static startTrackerInfo(builder:flatbuffers.Builder) {
-  builder.startObject(14);
+  builder.startObject(18);
 }
 
 static addImuType(builder:flatbuffers.Builder, imuType:ImuType) {
@@ -203,6 +237,22 @@ static addDataSupport(builder:flatbuffers.Builder, dataSupport:TrackerDataType) 
   builder.addFieldInt8(13, dataSupport, TrackerDataType.ROTATION);
 }
 
+static addLearnedDriftRateDegPerMin(builder:flatbuffers.Builder, learnedDriftRateDegPerMin:number) {
+  builder.addFieldFloat32(14, learnedDriftRateDegPerMin, 0.0);
+}
+
+static addTotalDriftObservations(builder:flatbuffers.Builder, totalDriftObservations:number) {
+  builder.addFieldInt32(15, totalDriftObservations, 0);
+}
+
+static addAutoLearnDrift(builder:flatbuffers.Builder, autoLearnDrift:boolean) {
+  builder.addFieldInt8(16, +autoLearnDrift, +true);
+}
+
+static addImuProfileOverride(builder:flatbuffers.Builder, imuProfileOverrideOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(17, imuProfileOverrideOffset, 0);
+}
+
 static endTrackerInfo(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
@@ -224,7 +274,11 @@ unpack(): TrackerInfoT {
     (this.mountingResetOrientation() !== null ? this.mountingResetOrientation()!.unpack() : null),
     this.isHmd(),
     this.magnetometer(),
-    this.dataSupport()
+    this.dataSupport(),
+    this.learnedDriftRateDegPerMin(),
+    this.totalDriftObservations(),
+    this.autoLearnDrift(),
+    this.imuProfileOverride()
   );
 }
 
@@ -244,6 +298,10 @@ unpackTo(_o: TrackerInfoT): void {
   _o.isHmd = this.isHmd();
   _o.magnetometer = this.magnetometer();
   _o.dataSupport = this.dataSupport();
+  _o.learnedDriftRateDegPerMin = this.learnedDriftRateDegPerMin();
+  _o.totalDriftObservations = this.totalDriftObservations();
+  _o.autoLearnDrift = this.autoLearnDrift();
+  _o.imuProfileOverride = this.imuProfileOverride();
 }
 }
 
@@ -262,13 +320,18 @@ constructor(
   public mountingResetOrientation: QuatT|null = null,
   public isHmd: boolean = false,
   public magnetometer: MagnetometerStatus = MagnetometerStatus.NOT_SUPPORTED,
-  public dataSupport: TrackerDataType = TrackerDataType.ROTATION
+  public dataSupport: TrackerDataType = TrackerDataType.ROTATION,
+  public learnedDriftRateDegPerMin: number = 0.0,
+  public totalDriftObservations: number = 0,
+  public autoLearnDrift: boolean = true,
+  public imuProfileOverride: string|Uint8Array|null = null
 ){}
 
 
 pack(builder:flatbuffers.Builder): flatbuffers.Offset {
   const displayName = (this.displayName !== null ? builder.createString(this.displayName!) : 0);
   const customName = (this.customName !== null ? builder.createString(this.customName!) : 0);
+  const imuProfileOverride = (this.imuProfileOverride !== null ? builder.createString(this.imuProfileOverride!) : 0);
 
   TrackerInfo.startTrackerInfo(builder);
   TrackerInfo.addImuType(builder, this.imuType);
@@ -285,6 +348,10 @@ pack(builder:flatbuffers.Builder): flatbuffers.Offset {
   TrackerInfo.addIsHmd(builder, this.isHmd);
   TrackerInfo.addMagnetometer(builder, this.magnetometer);
   TrackerInfo.addDataSupport(builder, this.dataSupport);
+  TrackerInfo.addLearnedDriftRateDegPerMin(builder, this.learnedDriftRateDegPerMin);
+  TrackerInfo.addTotalDriftObservations(builder, this.totalDriftObservations);
+  TrackerInfo.addAutoLearnDrift(builder, this.autoLearnDrift);
+  TrackerInfo.addImuProfileOverride(builder, imuProfileOverride);
 
   return TrackerInfo.endTrackerInfo(builder);
 }

@@ -13,9 +13,16 @@ export { DeviceDataMask, DeviceDataMaskT } from './solarxr-protocol/data-feed/de
 export { ServerGuards, ServerGuardsT } from './solarxr-protocol/data-feed/server/server-guards.js';
 export { StayAlignedPose, StayAlignedPoseT } from './solarxr-protocol/data-feed/stay-aligned/stay-aligned-pose.js';
 export { StayAlignedTracker, StayAlignedTrackerT } from './solarxr-protocol/data-feed/stay-aligned/stay-aligned-tracker.js';
+export { AdaptiveDriftFreezeReason } from './solarxr-protocol/data-feed/tracker/adaptive-drift-freeze-reason.js';
+export { AdaptiveDriftMode } from './solarxr-protocol/data-feed/tracker/adaptive-drift-mode.js';
+export { AdaptiveDriftState, AdaptiveDriftStateT } from './solarxr-protocol/data-feed/tracker/adaptive-drift-state.js';
+export { FilterHealth, FilterHealthT } from './solarxr-protocol/data-feed/tracker/filter-health.js';
 export { TrackerData, TrackerDataT } from './solarxr-protocol/data-feed/tracker/tracker-data.js';
 export { TrackerDataMask, TrackerDataMaskT } from './solarxr-protocol/data-feed/tracker/tracker-data-mask.js';
 export { TrackerInfo, TrackerInfoT } from './solarxr-protocol/data-feed/tracker/tracker-info.js';
+export { TrackerRecovery, TrackerRecoveryT } from './solarxr-protocol/data-feed/tracker/tracker-recovery.js';
+export { TrackerRecoveryReason } from './solarxr-protocol/data-feed/tracker/tracker-recovery-reason.js';
+export { TrackerRecoveryState } from './solarxr-protocol/data-feed/tracker/tracker-recovery-state.js';
 export { BodyPart } from './solarxr-protocol/datatypes/body-part.js';
 export { Bytes, BytesT } from './solarxr-protocol/datatypes/bytes.js';
 export { DeviceId, DeviceIdT } from './solarxr-protocol/datatypes/device-id.js';
@@ -52,6 +59,8 @@ export { TopicHandle, TopicHandleT } from './solarxr-protocol/pub-sub/topic-hand
 export { TopicHandleRequest, TopicHandleRequestT } from './solarxr-protocol/pub-sub/topic-handle-request.js';
 export { TopicId, TopicIdT } from './solarxr-protocol/pub-sub/topic-id.js';
 export { TopicMapping, TopicMappingT } from './solarxr-protocol/pub-sub/topic-mapping.js';
+export { AdaptiveDriftAction } from './solarxr-protocol/rpc/adaptive-drift-action.js';
+export { AdaptiveDriftControlRequest, AdaptiveDriftControlRequestT } from './solarxr-protocol/rpc/adaptive-drift-control-request.js';
 export { AddUnknownDeviceRequest, AddUnknownDeviceRequestT } from './solarxr-protocol/rpc/add-unknown-device-request.js';
 export { ArmsMountingResetMode } from './solarxr-protocol/rpc/arms-mounting-reset-mode.js';
 export { AssignTrackerRequest, AssignTrackerRequestT } from './solarxr-protocol/rpc/assign-tracker-request.js';

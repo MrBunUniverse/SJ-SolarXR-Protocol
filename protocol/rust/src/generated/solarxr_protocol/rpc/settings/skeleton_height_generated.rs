@@ -27,6 +27,11 @@ impl<'a> flatbuffers::Follow<'a> for SkeletonHeight<'a> {
 impl<'a> SkeletonHeight<'a> {
   pub const VT_HMD_HEIGHT: flatbuffers::VOffsetT = 4;
   pub const VT_FLOOR_HEIGHT: flatbuffers::VOffsetT = 6;
+  pub const VT_OSC_RATE: flatbuffers::VOffsetT = 8;
+  pub const VT_CHATBOX_ENABLED: flatbuffers::VOffsetT = 10;
+  pub const VT_CHATBOX_TRIGGER: flatbuffers::VOffsetT = 12;
+  pub const VT_CHATBOX_MESSAGE: flatbuffers::VOffsetT = 14;
+  pub const VT_CHATBOX_ONLY: flatbuffers::VOffsetT = 16;
 
   #[inline]
   pub unsafe fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
@@ -35,11 +40,16 @@ impl<'a> SkeletonHeight<'a> {
   #[allow(unused_mut)]
   pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
     _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
-    args: &'args SkeletonHeightArgs
+    args: &'args SkeletonHeightArgs<'args>
   ) -> flatbuffers::WIPOffset<SkeletonHeight<'bldr>> {
     let mut builder = SkeletonHeightBuilder::new(_fbb);
+    if let Some(x) = args.chatbox_message { builder.add_chatbox_message(x); }
+    if let Some(x) = args.osc_rate { builder.add_osc_rate(x); }
     if let Some(x) = args.floor_height { builder.add_floor_height(x); }
     if let Some(x) = args.hmd_height { builder.add_hmd_height(x); }
+    if let Some(x) = args.chatbox_only { builder.add_chatbox_only(x); }
+    if let Some(x) = args.chatbox_trigger { builder.add_chatbox_trigger(x); }
+    if let Some(x) = args.chatbox_enabled { builder.add_chatbox_enabled(x); }
     builder.finish()
   }
 
@@ -58,6 +68,41 @@ impl<'a> SkeletonHeight<'a> {
     // which contains a valid value in this slot
     unsafe { self._tab.get::<f32>(SkeletonHeight::VT_FLOOR_HEIGHT, None)}
   }
+  #[inline]
+  pub fn osc_rate(&self) -> Option<i32> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<i32>(SkeletonHeight::VT_OSC_RATE, None)}
+  }
+  #[inline]
+  pub fn chatbox_enabled(&self) -> Option<bool> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(SkeletonHeight::VT_CHATBOX_ENABLED, None)}
+  }
+  #[inline]
+  pub fn chatbox_trigger(&self) -> Option<bool> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(SkeletonHeight::VT_CHATBOX_TRIGGER, None)}
+  }
+  #[inline]
+  pub fn chatbox_message(&self) -> Option<&'a str> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<flatbuffers::ForwardsUOffset<&str>>(SkeletonHeight::VT_CHATBOX_MESSAGE, None)}
+  }
+  #[inline]
+  pub fn chatbox_only(&self) -> Option<bool> {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(SkeletonHeight::VT_CHATBOX_ONLY, None)}
+  }
 }
 
 impl flatbuffers::Verifiable for SkeletonHeight<'_> {
@@ -69,20 +114,35 @@ impl flatbuffers::Verifiable for SkeletonHeight<'_> {
     v.visit_table(pos)?
      .visit_field::<f32>("hmd_height", Self::VT_HMD_HEIGHT, false)?
      .visit_field::<f32>("floor_height", Self::VT_FLOOR_HEIGHT, false)?
+     .visit_field::<i32>("osc_rate", Self::VT_OSC_RATE, false)?
+     .visit_field::<bool>("chatbox_enabled", Self::VT_CHATBOX_ENABLED, false)?
+     .visit_field::<bool>("chatbox_trigger", Self::VT_CHATBOX_TRIGGER, false)?
+     .visit_field::<flatbuffers::ForwardsUOffset<&str>>("chatbox_message", Self::VT_CHATBOX_MESSAGE, false)?
+     .visit_field::<bool>("chatbox_only", Self::VT_CHATBOX_ONLY, false)?
      .finish();
     Ok(())
   }
 }
-pub struct SkeletonHeightArgs {
+pub struct SkeletonHeightArgs<'a> {
     pub hmd_height: Option<f32>,
     pub floor_height: Option<f32>,
+    pub osc_rate: Option<i32>,
+    pub chatbox_enabled: Option<bool>,
+    pub chatbox_trigger: Option<bool>,
+    pub chatbox_message: Option<flatbuffers::WIPOffset<&'a str>>,
+    pub chatbox_only: Option<bool>,
 }
-impl<'a> Default for SkeletonHeightArgs {
+impl<'a> Default for SkeletonHeightArgs<'a> {
   #[inline]
   fn default() -> Self {
     SkeletonHeightArgs {
       hmd_height: None,
       floor_height: None,
+      osc_rate: None,
+      chatbox_enabled: None,
+      chatbox_trigger: None,
+      chatbox_message: None,
+      chatbox_only: None,
     }
   }
 }
@@ -99,6 +159,26 @@ impl<'a: 'b, 'b> SkeletonHeightBuilder<'a, 'b> {
   #[inline]
   pub fn add_floor_height(&mut self, floor_height: f32) {
     self.fbb_.push_slot_always::<f32>(SkeletonHeight::VT_FLOOR_HEIGHT, floor_height);
+  }
+  #[inline]
+  pub fn add_osc_rate(&mut self, osc_rate: i32) {
+    self.fbb_.push_slot_always::<i32>(SkeletonHeight::VT_OSC_RATE, osc_rate);
+  }
+  #[inline]
+  pub fn add_chatbox_enabled(&mut self, chatbox_enabled: bool) {
+    self.fbb_.push_slot_always::<bool>(SkeletonHeight::VT_CHATBOX_ENABLED, chatbox_enabled);
+  }
+  #[inline]
+  pub fn add_chatbox_trigger(&mut self, chatbox_trigger: bool) {
+    self.fbb_.push_slot_always::<bool>(SkeletonHeight::VT_CHATBOX_TRIGGER, chatbox_trigger);
+  }
+  #[inline]
+  pub fn add_chatbox_message(&mut self, chatbox_message: flatbuffers::WIPOffset<&'b  str>) {
+    self.fbb_.push_slot_always::<flatbuffers::WIPOffset<_>>(SkeletonHeight::VT_CHATBOX_MESSAGE, chatbox_message);
+  }
+  #[inline]
+  pub fn add_chatbox_only(&mut self, chatbox_only: bool) {
+    self.fbb_.push_slot_always::<bool>(SkeletonHeight::VT_CHATBOX_ONLY, chatbox_only);
   }
   #[inline]
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> SkeletonHeightBuilder<'a, 'b> {
@@ -120,6 +200,11 @@ impl core::fmt::Debug for SkeletonHeight<'_> {
     let mut ds = f.debug_struct("SkeletonHeight");
       ds.field("hmd_height", &self.hmd_height());
       ds.field("floor_height", &self.floor_height());
+      ds.field("osc_rate", &self.osc_rate());
+      ds.field("chatbox_enabled", &self.chatbox_enabled());
+      ds.field("chatbox_trigger", &self.chatbox_trigger());
+      ds.field("chatbox_message", &self.chatbox_message());
+      ds.field("chatbox_only", &self.chatbox_only());
       ds.finish()
   }
 }

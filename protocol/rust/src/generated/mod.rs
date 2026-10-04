@@ -25,6 +25,20 @@ pub mod solarxr_protocol {
     } // stay_aligned
     pub mod tracker {
       use super::*;
+      mod tracker_recovery_state_generated;
+      pub use self::tracker_recovery_state_generated::*;
+      mod tracker_recovery_reason_generated;
+      pub use self::tracker_recovery_reason_generated::*;
+      mod adaptive_drift_mode_generated;
+      pub use self::adaptive_drift_mode_generated::*;
+      mod adaptive_drift_freeze_reason_generated;
+      pub use self::adaptive_drift_freeze_reason_generated::*;
+      mod tracker_recovery_generated;
+      pub use self::tracker_recovery_generated::*;
+      mod adaptive_drift_state_generated;
+      pub use self::adaptive_drift_state_generated::*;
+      mod filter_health_generated;
+      pub use self::filter_health_generated::*;
       mod tracker_data_generated;
       pub use self::tracker_data_generated::*;
       mod tracker_data_mask_generated;
@@ -156,6 +170,8 @@ pub mod solarxr_protocol {
     pub use self::reset_type_generated::*;
     mod reset_status_generated;
     pub use self::reset_status_generated::*;
+    mod adaptive_drift_action_generated;
+    pub use self::adaptive_drift_action_generated::*;
     mod arms_mounting_reset_mode_generated;
     pub use self::arms_mounting_reset_mode_generated::*;
     mod skeleton_bone_generated;
@@ -222,6 +238,8 @@ pub mod solarxr_protocol {
     pub use self::assign_tracker_request_generated::*;
     mod clear_drift_compensation_request_generated;
     pub use self::clear_drift_compensation_request_generated::*;
+    mod adaptive_drift_control_request_generated;
+    pub use self::adaptive_drift_control_request_generated::*;
     mod settings_request_generated;
     pub use self::settings_request_generated::*;
     mod settings_response_generated;

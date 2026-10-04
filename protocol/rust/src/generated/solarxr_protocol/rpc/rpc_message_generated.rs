@@ -12,10 +12,10 @@ use super::*;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
 pub const ENUM_MIN_RPC_MESSAGE: u8 = 0;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
-pub const ENUM_MAX_RPC_MESSAGE: u8 = 86;
+pub const ENUM_MAX_RPC_MESSAGE: u8 = 87;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
 #[allow(non_camel_case_types)]
-pub const ENUM_VALUES_RPC_MESSAGE: [RpcMessage; 87] = [
+pub const ENUM_VALUES_RPC_MESSAGE: [RpcMessage; 88] = [
   RpcMessage::NONE,
   RpcMessage::HeartbeatRequest,
   RpcMessage::HeartbeatResponse,
@@ -103,6 +103,7 @@ pub const ENUM_VALUES_RPC_MESSAGE: [RpcMessage; 87] = [
   RpcMessage::OpenUriRequest,
   RpcMessage::OpenUriResponse,
   RpcMessage::EnableSteamVRDriverRequest,
+  RpcMessage::AdaptiveDriftControlRequest,
 ];
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -197,9 +198,10 @@ impl RpcMessage {
   pub const OpenUriRequest: Self = Self(84);
   pub const OpenUriResponse: Self = Self(85);
   pub const EnableSteamVRDriverRequest: Self = Self(86);
+  pub const AdaptiveDriftControlRequest: Self = Self(87);
 
   pub const ENUM_MIN: u8 = 0;
-  pub const ENUM_MAX: u8 = 86;
+  pub const ENUM_MAX: u8 = 87;
   pub const ENUM_VALUES: &'static [Self] = &[
     Self::NONE,
     Self::HeartbeatRequest,
@@ -288,6 +290,7 @@ impl RpcMessage {
     Self::OpenUriRequest,
     Self::OpenUriResponse,
     Self::EnableSteamVRDriverRequest,
+    Self::AdaptiveDriftControlRequest,
   ];
   /// Returns the variant's name or "" if unknown.
   pub fn variant_name(self) -> Option<&'static str> {
@@ -379,6 +382,7 @@ impl RpcMessage {
       Self::OpenUriRequest => Some("OpenUriRequest"),
       Self::OpenUriResponse => Some("OpenUriResponse"),
       Self::EnableSteamVRDriverRequest => Some("EnableSteamVRDriverRequest"),
+      Self::AdaptiveDriftControlRequest => Some("AdaptiveDriftControlRequest"),
       _ => None,
     }
   }

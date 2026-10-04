@@ -15,8 +15,21 @@ public final class ClearDriftCompensationRequest extends Table {
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
   public ClearDriftCompensationRequest __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  /**
+   * Optional tracker to clear. Null retains the legacy all-trackers behavior.
+   */
+  public solarxr_protocol.datatypes.TrackerId trackerId() { return trackerId(new solarxr_protocol.datatypes.TrackerId()); }
+  public solarxr_protocol.datatypes.TrackerId trackerId(solarxr_protocol.datatypes.TrackerId obj) { int o = __offset(4); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
 
-  public static void startClearDriftCompensationRequest(FlatBufferBuilder builder) { builder.startTable(0); }
+  public static int createClearDriftCompensationRequest(FlatBufferBuilder builder,
+      int trackerIdOffset) {
+    builder.startTable(1);
+    ClearDriftCompensationRequest.addTrackerId(builder, trackerIdOffset);
+    return ClearDriftCompensationRequest.endClearDriftCompensationRequest(builder);
+  }
+
+  public static void startClearDriftCompensationRequest(FlatBufferBuilder builder) { builder.startTable(1); }
+  public static void addTrackerId(FlatBufferBuilder builder, int trackerIdOffset) { builder.addOffset(0, trackerIdOffset, 0); }
   public static int endClearDriftCompensationRequest(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
@@ -34,11 +47,15 @@ public final class ClearDriftCompensationRequest extends Table {
     return _o;
   }
   public void unpackTo(ClearDriftCompensationRequestT _o) {
+    if (trackerId() != null) _o.setTrackerId(trackerId().unpack());
+    else _o.setTrackerId(null);
   }
   public static int pack(FlatBufferBuilder builder, ClearDriftCompensationRequestT _o) {
     if (_o == null) return 0;
-    startClearDriftCompensationRequest(builder);
-    return endClearDriftCompensationRequest(builder);
+    int _trackerId = _o.getTrackerId() == null ? 0 : solarxr_protocol.datatypes.TrackerId.pack(builder, _o.getTrackerId());
+    return createClearDriftCompensationRequest(
+      builder,
+      _trackerId);
   }
 }
 

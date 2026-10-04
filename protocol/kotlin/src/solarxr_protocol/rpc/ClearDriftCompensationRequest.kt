@@ -16,6 +16,18 @@ class ClearDriftCompensationRequest : Table() {
         __init(_i, _bb)
         return this
     }
+    /**
+     * Optional tracker to clear. Null retains the legacy all-trackers behavior.
+     */
+    val trackerId : solarxr_protocol.datatypes.TrackerId? get() = trackerId(solarxr_protocol.datatypes.TrackerId())
+    fun trackerId(obj: solarxr_protocol.datatypes.TrackerId) : solarxr_protocol.datatypes.TrackerId? {
+        val o = __offset(4)
+        return if (o != 0) {
+            obj.__assign(__indirect(o + bb_pos), bb)
+        } else {
+            null
+        }
+    }
     companion object {
         @JvmStatic
         fun validateVersion() = Constants.FLATBUFFERS_22_10_26()
@@ -27,7 +39,15 @@ class ClearDriftCompensationRequest : Table() {
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
         @JvmStatic
-        fun startClearDriftCompensationRequest(builder: FlatBufferBuilder) = builder.startTable(0)
+        fun createClearDriftCompensationRequest(builder: FlatBufferBuilder, trackerIdOffset: Int) : Int {
+            builder.startTable(1)
+            addTrackerId(builder, trackerIdOffset)
+            return endClearDriftCompensationRequest(builder)
+        }
+        @JvmStatic
+        fun startClearDriftCompensationRequest(builder: FlatBufferBuilder) = builder.startTable(1)
+        @JvmStatic
+        fun addTrackerId(builder: FlatBufferBuilder, trackerId: Int) = builder.addOffset(0, trackerId, 0)
         @JvmStatic
         fun endClearDriftCompensationRequest(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()

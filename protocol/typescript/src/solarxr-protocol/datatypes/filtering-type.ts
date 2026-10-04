@@ -6,5 +6,6 @@
 export enum FilteringType {
   NONE = 0,
   SMOOTHING = 1,
-  PREDICTION = 2
+  PREDICTION = 2,
+  ADAPTIVE_HYBRID = 3
 }

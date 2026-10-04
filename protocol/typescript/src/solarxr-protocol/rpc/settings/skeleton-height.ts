@@ -37,8 +37,30 @@ oscRate():number|null {
   return offset ? this.bb!.readInt32(this.bb_pos + offset) : null;
 }
 
+chatboxEnabled():boolean|null {
+  const offset = this.bb!.__offset(this.bb_pos, 10);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : null;
+}
+
+chatboxTrigger():boolean|null {
+  const offset = this.bb!.__offset(this.bb_pos, 12);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : null;
+}
+
+chatboxMessage():string|null
+chatboxMessage(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
+chatboxMessage(optionalEncoding?:any):string|Uint8Array|null {
+  const offset = this.bb!.__offset(this.bb_pos, 14);
+  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+}
+
+chatboxOnly():boolean|null {
+  const offset = this.bb!.__offset(this.bb_pos, 16);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : null;
+}
+
 static startSkeletonHeight(builder:flatbuffers.Builder) {
-  builder.startObject(3);
+  builder.startObject(7);
 }
 
 static addHmdHeight(builder:flatbuffers.Builder, hmdHeight:number) {
@@ -53,12 +75,28 @@ static addOscRate(builder:flatbuffers.Builder, oscRate:number) {
   builder.addFieldInt32(2, oscRate, 0);
 }
 
+static addChatboxEnabled(builder:flatbuffers.Builder, chatboxEnabled:boolean) {
+  builder.addFieldInt8(3, +chatboxEnabled, 0);
+}
+
+static addChatboxTrigger(builder:flatbuffers.Builder, chatboxTrigger:boolean) {
+  builder.addFieldInt8(4, +chatboxTrigger, 0);
+}
+
+static addChatboxMessage(builder:flatbuffers.Builder, chatboxMessageOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(5, chatboxMessageOffset, 0);
+}
+
+static addChatboxOnly(builder:flatbuffers.Builder, chatboxOnly:boolean) {
+  builder.addFieldInt8(6, +chatboxOnly, 0);
+}
+
 static endSkeletonHeight(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createSkeletonHeight(builder:flatbuffers.Builder, hmdHeight:number|null, floorHeight:number|null, oscRate:number|null = null):flatbuffers.Offset {
+static createSkeletonHeight(builder:flatbuffers.Builder, hmdHeight:number|null, floorHeight:number|null, oscRate:number|null, chatboxEnabled:boolean|null, chatboxTrigger:boolean|null, chatboxMessageOffset:flatbuffers.Offset, chatboxOnly:boolean|null):flatbuffers.Offset {
   SkeletonHeight.startSkeletonHeight(builder);
   if (hmdHeight !== null)
     SkeletonHeight.addHmdHeight(builder, hmdHeight);
@@ -66,6 +104,13 @@ static createSkeletonHeight(builder:flatbuffers.Builder, hmdHeight:number|null, 
     SkeletonHeight.addFloorHeight(builder, floorHeight);
   if (oscRate !== null)
     SkeletonHeight.addOscRate(builder, oscRate);
+  if (chatboxEnabled !== null)
+    SkeletonHeight.addChatboxEnabled(builder, chatboxEnabled);
+  if (chatboxTrigger !== null)
+    SkeletonHeight.addChatboxTrigger(builder, chatboxTrigger);
+  SkeletonHeight.addChatboxMessage(builder, chatboxMessageOffset);
+  if (chatboxOnly !== null)
+    SkeletonHeight.addChatboxOnly(builder, chatboxOnly);
   return SkeletonHeight.endSkeletonHeight(builder);
 }
 
@@ -73,7 +118,11 @@ unpack(): SkeletonHeightT {
   return new SkeletonHeightT(
     this.hmdHeight(),
     this.floorHeight(),
-    this.oscRate()
+    this.oscRate(),
+    this.chatboxEnabled(),
+    this.chatboxTrigger(),
+    this.chatboxMessage(),
+    this.chatboxOnly()
   );
 }
 
@@ -82,6 +131,10 @@ unpackTo(_o: SkeletonHeightT): void {
   _o.hmdHeight = this.hmdHeight();
   _o.floorHeight = this.floorHeight();
   _o.oscRate = this.oscRate();
+  _o.chatboxEnabled = this.chatboxEnabled();
+  _o.chatboxTrigger = this.chatboxTrigger();
+  _o.chatboxMessage = this.chatboxMessage();
+  _o.chatboxOnly = this.chatboxOnly();
 }
 }
 
@@ -89,15 +142,25 @@ export class SkeletonHeightT implements flatbuffers.IGeneratedObject {
 constructor(
   public hmdHeight: number|null = null,
   public floorHeight: number|null = null,
-  public oscRate: number|null = null
+  public oscRate: number|null = null,
+  public chatboxEnabled: boolean|null = null,
+  public chatboxTrigger: boolean|null = null,
+  public chatboxMessage: string|Uint8Array|null = null,
+  public chatboxOnly: boolean|null = null
 ){}
 
 
 pack(builder:flatbuffers.Builder): flatbuffers.Offset {
+  const chatboxMessage = (this.chatboxMessage !== null ? builder.createString(this.chatboxMessage!) : 0);
+
   return SkeletonHeight.createSkeletonHeight(builder,
     this.hmdHeight,
     this.floorHeight,
-    this.oscRate
+    this.oscRate,
+    this.chatboxEnabled,
+    this.chatboxTrigger,
+    chatboxMessage,
+    this.chatboxOnly
   );
 }
 }

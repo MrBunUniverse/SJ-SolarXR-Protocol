@@ -90,8 +90,23 @@ stayAligned():boolean {
   return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
 }
 
+recovery():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 30);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
+}
+
+adaptiveDrift():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 32);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
+}
+
+filterHealth():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 34);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
+}
+
 static startTrackerDataMask(builder:flatbuffers.Builder) {
-  builder.startObject(13);
+  builder.startObject(16);
 }
 
 static addInfo(builder:flatbuffers.Builder, info:boolean) {
@@ -146,12 +161,24 @@ static addStayAligned(builder:flatbuffers.Builder, stayAligned:boolean) {
   builder.addFieldInt8(12, +stayAligned, +false);
 }
 
+static addRecovery(builder:flatbuffers.Builder, recovery:boolean) {
+  builder.addFieldInt8(13, +recovery, +false);
+}
+
+static addAdaptiveDrift(builder:flatbuffers.Builder, adaptiveDrift:boolean) {
+  builder.addFieldInt8(14, +adaptiveDrift, +false);
+}
+
+static addFilterHealth(builder:flatbuffers.Builder, filterHealth:boolean) {
+  builder.addFieldInt8(15, +filterHealth, +false);
+}
+
 static endTrackerDataMask(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createTrackerDataMask(builder:flatbuffers.Builder, info:boolean, status:boolean, rotation:boolean, position:boolean, rawAngularVelocity:boolean, rawAcceleration:boolean, temp:boolean, linearAcceleration:boolean, rotationReferenceAdjusted:boolean, rotationIdentityAdjusted:boolean, tps:boolean, rawMagneticVector:boolean, stayAligned:boolean):flatbuffers.Offset {
+static createTrackerDataMask(builder:flatbuffers.Builder, info:boolean, status:boolean, rotation:boolean, position:boolean, rawAngularVelocity:boolean, rawAcceleration:boolean, temp:boolean, linearAcceleration:boolean, rotationReferenceAdjusted:boolean, rotationIdentityAdjusted:boolean, tps:boolean, rawMagneticVector:boolean, stayAligned:boolean, recovery:boolean, adaptiveDrift:boolean, filterHealth:boolean):flatbuffers.Offset {
   TrackerDataMask.startTrackerDataMask(builder);
   TrackerDataMask.addInfo(builder, info);
   TrackerDataMask.addStatus(builder, status);
@@ -166,6 +193,9 @@ static createTrackerDataMask(builder:flatbuffers.Builder, info:boolean, status:b
   TrackerDataMask.addTps(builder, tps);
   TrackerDataMask.addRawMagneticVector(builder, rawMagneticVector);
   TrackerDataMask.addStayAligned(builder, stayAligned);
+  TrackerDataMask.addRecovery(builder, recovery);
+  TrackerDataMask.addAdaptiveDrift(builder, adaptiveDrift);
+  TrackerDataMask.addFilterHealth(builder, filterHealth);
   return TrackerDataMask.endTrackerDataMask(builder);
 }
 
@@ -183,7 +213,10 @@ unpack(): TrackerDataMaskT {
     this.rotationIdentityAdjusted(),
     this.tps(),
     this.rawMagneticVector(),
-    this.stayAligned()
+    this.stayAligned(),
+    this.recovery(),
+    this.adaptiveDrift(),
+    this.filterHealth()
   );
 }
 
@@ -202,6 +235,9 @@ unpackTo(_o: TrackerDataMaskT): void {
   _o.tps = this.tps();
   _o.rawMagneticVector = this.rawMagneticVector();
   _o.stayAligned = this.stayAligned();
+  _o.recovery = this.recovery();
+  _o.adaptiveDrift = this.adaptiveDrift();
+  _o.filterHealth = this.filterHealth();
 }
 }
 
@@ -219,7 +255,10 @@ constructor(
   public rotationIdentityAdjusted: boolean = false,
   public tps: boolean = false,
   public rawMagneticVector: boolean = false,
-  public stayAligned: boolean = false
+  public stayAligned: boolean = false,
+  public recovery: boolean = false,
+  public adaptiveDrift: boolean = false,
+  public filterHealth: boolean = false
 ){}
 
 
@@ -237,7 +276,10 @@ pack(builder:flatbuffers.Builder): flatbuffers.Offset {
     this.rotationIdentityAdjusted,
     this.tps,
     this.rawMagneticVector,
-    this.stayAligned
+    this.stayAligned,
+    this.recovery,
+    this.adaptiveDrift,
+    this.filterHealth
   );
 }
 }

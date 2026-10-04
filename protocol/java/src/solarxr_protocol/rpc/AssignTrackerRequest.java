@@ -24,13 +24,20 @@ public final class AssignTrackerRequest extends Table {
   public ByteBuffer displayNameAsByteBuffer() { return __vector_as_bytebuffer(10, 1); }
   public ByteBuffer displayNameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 10, 1); }
   public boolean allowDriftCompensation() { int o = __offset(12); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  /**
+   * Optional server-owned IMU profile override. Null preserves the current value.
+   */
+  public String imuProfileOverride() { int o = __offset(14); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer imuProfileOverrideAsByteBuffer() { return __vector_as_bytebuffer(14, 1); }
+  public ByteBuffer imuProfileOverrideInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 14, 1); }
 
-  public static void startAssignTrackerRequest(FlatBufferBuilder builder) { builder.startTable(5); }
+  public static void startAssignTrackerRequest(FlatBufferBuilder builder) { builder.startTable(6); }
   public static void addTrackerId(FlatBufferBuilder builder, int trackerIdOffset) { builder.addOffset(0, trackerIdOffset, 0); }
   public static void addBodyPosition(FlatBufferBuilder builder, int bodyPosition) { builder.addByte(1, (byte) bodyPosition, (byte) 0); }
   public static void addMountingOrientation(FlatBufferBuilder builder, int mountingOrientationOffset) { builder.addStruct(2, mountingOrientationOffset, 0); }
   public static void addDisplayName(FlatBufferBuilder builder, int displayNameOffset) { builder.addOffset(3, displayNameOffset, 0); }
   public static void addAllowDriftCompensation(FlatBufferBuilder builder, boolean allowDriftCompensation) { builder.addBoolean(4, allowDriftCompensation, false); }
+  public static void addImuProfileOverride(FlatBufferBuilder builder, int imuProfileOverrideOffset) { builder.addOffset(5, imuProfileOverrideOffset, 0); }
   public static int endAssignTrackerRequest(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
@@ -58,17 +65,21 @@ public final class AssignTrackerRequest extends Table {
     _o.setDisplayName(_oDisplayName);
     boolean _oAllowDriftCompensation = allowDriftCompensation();
     _o.setAllowDriftCompensation(_oAllowDriftCompensation);
+    String _oImuProfileOverride = imuProfileOverride();
+    _o.setImuProfileOverride(_oImuProfileOverride);
   }
   public static int pack(FlatBufferBuilder builder, AssignTrackerRequestT _o) {
     if (_o == null) return 0;
     int _trackerId = _o.getTrackerId() == null ? 0 : solarxr_protocol.datatypes.TrackerId.pack(builder, _o.getTrackerId());
     int _displayName = _o.getDisplayName() == null ? 0 : builder.createString(_o.getDisplayName());
+    int _imuProfileOverride = _o.getImuProfileOverride() == null ? 0 : builder.createString(_o.getImuProfileOverride());
     startAssignTrackerRequest(builder);
     addTrackerId(builder, _trackerId);
     addBodyPosition(builder, _o.getBodyPosition());
     addMountingOrientation(builder, solarxr_protocol.datatypes.math.Quat.pack(builder, _o.getMountingOrientation()));
     addDisplayName(builder, _displayName);
     addAllowDriftCompensation(builder, _o.getAllowDriftCompensation());
+    addImuProfileOverride(builder, _imuProfileOverride);
     return endAssignTrackerRequest(builder);
   }
 }

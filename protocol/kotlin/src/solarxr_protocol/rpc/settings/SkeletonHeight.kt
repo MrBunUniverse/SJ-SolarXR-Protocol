@@ -26,6 +26,33 @@ class SkeletonHeight : Table() {
             val o = __offset(6)
             return if(o != 0) bb.getFloat(o + bb_pos) else null
         }
+    val oscRate : Int?
+        get() {
+            val o = __offset(8)
+            return if(o != 0) bb.getInt(o + bb_pos) else null
+        }
+    val chatboxEnabled : Boolean?
+        get() {
+            val o = __offset(10)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else null
+        }
+    val chatboxTrigger : Boolean?
+        get() {
+            val o = __offset(12)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else null
+        }
+    val chatboxMessage : String?
+        get() {
+            val o = __offset(14)
+            return if (o != 0) __string(o + bb_pos) else null
+        }
+    val chatboxMessageAsByteBuffer : ByteBuffer get() = __vector_as_bytebuffer(14, 1)
+    fun chatboxMessageInByteBuffer(_bb: ByteBuffer) : ByteBuffer = __vector_in_bytebuffer(_bb, 14, 1)
+    val chatboxOnly : Boolean?
+        get() {
+            val o = __offset(16)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else null
+        }
     companion object {
         @JvmStatic
         fun validateVersion() = Constants.FLATBUFFERS_22_10_26()
@@ -37,18 +64,33 @@ class SkeletonHeight : Table() {
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
         @JvmStatic
-        fun createSkeletonHeight(builder: FlatBufferBuilder, hmdHeight: Float?, floorHeight: Float?) : Int {
-            builder.startTable(2)
+        fun createSkeletonHeight(builder: FlatBufferBuilder, hmdHeight: Float?, floorHeight: Float?, oscRate: Int?, chatboxEnabled: Boolean?, chatboxTrigger: Boolean?, chatboxMessageOffset: Int, chatboxOnly: Boolean?) : Int {
+            builder.startTable(7)
+            addChatboxMessage(builder, chatboxMessageOffset)
+            oscRate?.run { addOscRate(builder, oscRate) }
             floorHeight?.run { addFloorHeight(builder, floorHeight) }
             hmdHeight?.run { addHmdHeight(builder, hmdHeight) }
+            chatboxOnly?.run { addChatboxOnly(builder, chatboxOnly) }
+            chatboxTrigger?.run { addChatboxTrigger(builder, chatboxTrigger) }
+            chatboxEnabled?.run { addChatboxEnabled(builder, chatboxEnabled) }
             return endSkeletonHeight(builder)
         }
         @JvmStatic
-        fun startSkeletonHeight(builder: FlatBufferBuilder) = builder.startTable(2)
+        fun startSkeletonHeight(builder: FlatBufferBuilder) = builder.startTable(7)
         @JvmStatic
         fun addHmdHeight(builder: FlatBufferBuilder, hmdHeight: Float) = builder.addFloat(0, hmdHeight, 0.0)
         @JvmStatic
         fun addFloorHeight(builder: FlatBufferBuilder, floorHeight: Float) = builder.addFloat(1, floorHeight, 0.0)
+        @JvmStatic
+        fun addOscRate(builder: FlatBufferBuilder, oscRate: Int) = builder.addInt(2, oscRate, 0)
+        @JvmStatic
+        fun addChatboxEnabled(builder: FlatBufferBuilder, chatboxEnabled: Boolean) = builder.addBoolean(3, chatboxEnabled, false)
+        @JvmStatic
+        fun addChatboxTrigger(builder: FlatBufferBuilder, chatboxTrigger: Boolean) = builder.addBoolean(4, chatboxTrigger, false)
+        @JvmStatic
+        fun addChatboxMessage(builder: FlatBufferBuilder, chatboxMessage: Int) = builder.addOffset(5, chatboxMessage, 0)
+        @JvmStatic
+        fun addChatboxOnly(builder: FlatBufferBuilder, chatboxOnly: Boolean) = builder.addBoolean(6, chatboxOnly, false)
         @JvmStatic
         fun endSkeletonHeight(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()

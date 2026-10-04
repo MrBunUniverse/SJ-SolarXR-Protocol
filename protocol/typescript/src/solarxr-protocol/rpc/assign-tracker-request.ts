@@ -52,8 +52,18 @@ allowDriftCompensation():boolean {
   return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
 }
 
+/**
+ * Optional server-owned IMU profile override. Null preserves the current value.
+ */
+imuProfileOverride():string|null
+imuProfileOverride(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
+imuProfileOverride(optionalEncoding?:any):string|Uint8Array|null {
+  const offset = this.bb!.__offset(this.bb_pos, 14);
+  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+}
+
 static startAssignTrackerRequest(builder:flatbuffers.Builder) {
-  builder.startObject(5);
+  builder.startObject(6);
 }
 
 static addTrackerId(builder:flatbuffers.Builder, trackerIdOffset:flatbuffers.Offset) {
@@ -76,6 +86,10 @@ static addAllowDriftCompensation(builder:flatbuffers.Builder, allowDriftCompensa
   builder.addFieldInt8(4, +allowDriftCompensation, +false);
 }
 
+static addImuProfileOverride(builder:flatbuffers.Builder, imuProfileOverrideOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(5, imuProfileOverrideOffset, 0);
+}
+
 static endAssignTrackerRequest(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
@@ -88,7 +102,8 @@ unpack(): AssignTrackerRequestT {
     this.bodyPosition(),
     (this.mountingOrientation() !== null ? this.mountingOrientation()!.unpack() : null),
     this.displayName(),
-    this.allowDriftCompensation()
+    this.allowDriftCompensation(),
+    this.imuProfileOverride()
   );
 }
 
@@ -99,6 +114,7 @@ unpackTo(_o: AssignTrackerRequestT): void {
   _o.mountingOrientation = (this.mountingOrientation() !== null ? this.mountingOrientation()!.unpack() : null);
   _o.displayName = this.displayName();
   _o.allowDriftCompensation = this.allowDriftCompensation();
+  _o.imuProfileOverride = this.imuProfileOverride();
 }
 }
 
@@ -108,13 +124,15 @@ constructor(
   public bodyPosition: BodyPart = BodyPart.NONE,
   public mountingOrientation: QuatT|null = null,
   public displayName: string|Uint8Array|null = null,
-  public allowDriftCompensation: boolean = false
+  public allowDriftCompensation: boolean = false,
+  public imuProfileOverride: string|Uint8Array|null = null
 ){}
 
 
 pack(builder:flatbuffers.Builder): flatbuffers.Offset {
   const trackerId = (this.trackerId !== null ? this.trackerId!.pack(builder) : 0);
   const displayName = (this.displayName !== null ? builder.createString(this.displayName!) : 0);
+  const imuProfileOverride = (this.imuProfileOverride !== null ? builder.createString(this.imuProfileOverride!) : 0);
 
   AssignTrackerRequest.startAssignTrackerRequest(builder);
   AssignTrackerRequest.addTrackerId(builder, trackerId);
@@ -122,6 +140,7 @@ pack(builder:flatbuffers.Builder): flatbuffers.Offset {
   AssignTrackerRequest.addMountingOrientation(builder, (this.mountingOrientation !== null ? this.mountingOrientation!.pack(builder) : 0));
   AssignTrackerRequest.addDisplayName(builder, displayName);
   AssignTrackerRequest.addAllowDriftCompensation(builder, this.allowDriftCompensation);
+  AssignTrackerRequest.addImuProfileOverride(builder, imuProfileOverride);
 
   return AssignTrackerRequest.endAssignTrackerRequest(builder);
 }

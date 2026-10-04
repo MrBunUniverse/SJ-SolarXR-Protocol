@@ -13,6 +13,9 @@ public class ResetsSettingsT {
   private float yawResetSmoothTime;
   private boolean saveMountingReset;
   private boolean resetHmdPitch;
+  private boolean deadTrackerRecoveryEnabled;
+  private boolean recoveryChatboxNotifications;
+  private boolean recoverySettingsPresent;
 
   public boolean getResetMountingFeet() { return resetMountingFeet; }
 
@@ -34,6 +37,18 @@ public class ResetsSettingsT {
 
   public void setResetHmdPitch(boolean resetHmdPitch) { this.resetHmdPitch = resetHmdPitch; }
 
+  public boolean getDeadTrackerRecoveryEnabled() { return deadTrackerRecoveryEnabled; }
+
+  public void setDeadTrackerRecoveryEnabled(boolean deadTrackerRecoveryEnabled) { this.deadTrackerRecoveryEnabled = deadTrackerRecoveryEnabled; }
+
+  public boolean getRecoveryChatboxNotifications() { return recoveryChatboxNotifications; }
+
+  public void setRecoveryChatboxNotifications(boolean recoveryChatboxNotifications) { this.recoveryChatboxNotifications = recoveryChatboxNotifications; }
+
+  public boolean getRecoverySettingsPresent() { return recoverySettingsPresent; }
+
+  public void setRecoverySettingsPresent(boolean recoverySettingsPresent) { this.recoverySettingsPresent = recoverySettingsPresent; }
+
 
   public ResetsSettingsT() {
     this.resetMountingFeet = false;
@@ -41,6 +56,9 @@ public class ResetsSettingsT {
     this.yawResetSmoothTime = 0.0f;
     this.saveMountingReset = false;
     this.resetHmdPitch = false;
+    this.deadTrackerRecoveryEnabled = true;
+    this.recoveryChatboxNotifications = true;
+    this.recoverySettingsPresent = false;
   }
 }
 

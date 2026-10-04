@@ -22,6 +22,9 @@ public class TrackerDataT {
   private Integer tps;
   private solarxr_protocol.datatypes.math.Vec3fT rawMagneticVector;
   private solarxr_protocol.data_feed.stay_aligned.StayAlignedTrackerT stayAligned;
+  private solarxr_protocol.data_feed.tracker.TrackerRecoveryT recovery;
+  private solarxr_protocol.data_feed.tracker.AdaptiveDriftStateT adaptiveDrift;
+  private solarxr_protocol.data_feed.tracker.FilterHealthT filterHealth;
 
   public solarxr_protocol.datatypes.TrackerIdT getTrackerId() { return trackerId; }
 
@@ -79,6 +82,18 @@ public class TrackerDataT {
 
   public void setStayAligned(solarxr_protocol.data_feed.stay_aligned.StayAlignedTrackerT stayAligned) { this.stayAligned = stayAligned; }
 
+  public solarxr_protocol.data_feed.tracker.TrackerRecoveryT getRecovery() { return recovery; }
+
+  public void setRecovery(solarxr_protocol.data_feed.tracker.TrackerRecoveryT recovery) { this.recovery = recovery; }
+
+  public solarxr_protocol.data_feed.tracker.AdaptiveDriftStateT getAdaptiveDrift() { return adaptiveDrift; }
+
+  public void setAdaptiveDrift(solarxr_protocol.data_feed.tracker.AdaptiveDriftStateT adaptiveDrift) { this.adaptiveDrift = adaptiveDrift; }
+
+  public solarxr_protocol.data_feed.tracker.FilterHealthT getFilterHealth() { return filterHealth; }
+
+  public void setFilterHealth(solarxr_protocol.data_feed.tracker.FilterHealthT filterHealth) { this.filterHealth = filterHealth; }
+
 
   public TrackerDataT() {
     this.trackerId = null;
@@ -95,6 +110,9 @@ public class TrackerDataT {
     this.tps = null;
     this.rawMagneticVector = new solarxr_protocol.datatypes.math.Vec3fT();
     this.stayAligned = null;
+    this.recovery = null;
+    this.adaptiveDrift = null;
+    this.filterHealth = null;
   }
 }
 

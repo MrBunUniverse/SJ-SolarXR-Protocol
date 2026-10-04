@@ -21,6 +21,9 @@ public class TrackerDataMaskT {
   private boolean tps;
   private boolean rawMagneticVector;
   private boolean stayAligned;
+  private boolean recovery;
+  private boolean adaptiveDrift;
+  private boolean filterHealth;
 
   public boolean getInfo() { return info; }
 
@@ -74,6 +77,18 @@ public class TrackerDataMaskT {
 
   public void setStayAligned(boolean stayAligned) { this.stayAligned = stayAligned; }
 
+  public boolean getRecovery() { return recovery; }
+
+  public void setRecovery(boolean recovery) { this.recovery = recovery; }
+
+  public boolean getAdaptiveDrift() { return adaptiveDrift; }
+
+  public void setAdaptiveDrift(boolean adaptiveDrift) { this.adaptiveDrift = adaptiveDrift; }
+
+  public boolean getFilterHealth() { return filterHealth; }
+
+  public void setFilterHealth(boolean filterHealth) { this.filterHealth = filterHealth; }
+
 
   public TrackerDataMaskT() {
     this.info = false;
@@ -89,6 +104,9 @@ public class TrackerDataMaskT {
     this.tps = false;
     this.rawMagneticVector = false;
     this.stayAligned = false;
+    this.recovery = false;
+    this.adaptiveDrift = false;
+    this.filterHealth = false;
   }
 }
 

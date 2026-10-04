@@ -143,6 +143,40 @@ class TrackerInfo : Table() {
             val o = __offset(30)
             return if(o != 0) bb.get(o + bb_pos).toUByte() else 0u
         }
+    /**
+     * Signed learned yaw drift compensation rate in degrees per minute.
+     */
+    val learnedDriftRateDegPerMin : Float
+        get() {
+            val o = __offset(32)
+            return if(o != 0) bb.getFloat(o + bb_pos) else 0.0f
+        }
+    /**
+     * Number of accepted drift observations used to update the learned rate.
+     */
+    val totalDriftObservations : UInt
+        get() {
+            val o = __offset(34)
+            return if(o != 0) bb.getInt(o + bb_pos).toUInt() else 0u
+        }
+    /**
+     * Whether this tracker is currently allowed to learn drift across resets.
+     */
+    val autoLearnDrift : Boolean
+        get() {
+            val o = __offset(36)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else true
+        }
+    /**
+     * Server-owned IMU profile override, or null for automatic detection.
+     */
+    val imuProfileOverride : String?
+        get() {
+            val o = __offset(38)
+            return if (o != 0) __string(o + bb_pos) else null
+        }
+    val imuProfileOverrideAsByteBuffer : ByteBuffer get() = __vector_as_bytebuffer(38, 1)
+    fun imuProfileOverrideInByteBuffer(_bb: ByteBuffer) : ByteBuffer = __vector_in_bytebuffer(_bb, 38, 1)
     companion object {
         @JvmStatic
         fun validateVersion() = Constants.FLATBUFFERS_22_10_26()
@@ -154,7 +188,7 @@ class TrackerInfo : Table() {
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
         @JvmStatic
-        fun startTrackerInfo(builder: FlatBufferBuilder) = builder.startTable(14)
+        fun startTrackerInfo(builder: FlatBufferBuilder) = builder.startTable(18)
         @JvmStatic
         fun addImuType(builder: FlatBufferBuilder, imuType: UShort) = builder.addShort(0, imuType.toShort(), 0)
         @JvmStatic
@@ -183,6 +217,14 @@ class TrackerInfo : Table() {
         fun addMagnetometer(builder: FlatBufferBuilder, magnetometer: UByte) = builder.addByte(12, magnetometer.toByte(), 0)
         @JvmStatic
         fun addDataSupport(builder: FlatBufferBuilder, dataSupport: UByte) = builder.addByte(13, dataSupport.toByte(), 0)
+        @JvmStatic
+        fun addLearnedDriftRateDegPerMin(builder: FlatBufferBuilder, learnedDriftRateDegPerMin: Float) = builder.addFloat(14, learnedDriftRateDegPerMin, 0.0)
+        @JvmStatic
+        fun addTotalDriftObservations(builder: FlatBufferBuilder, totalDriftObservations: UInt) = builder.addInt(15, totalDriftObservations.toInt(), 0)
+        @JvmStatic
+        fun addAutoLearnDrift(builder: FlatBufferBuilder, autoLearnDrift: Boolean) = builder.addBoolean(16, autoLearnDrift, true)
+        @JvmStatic
+        fun addImuProfileOverride(builder: FlatBufferBuilder, imuProfileOverride: Int) = builder.addOffset(17, imuProfileOverride, 0)
         @JvmStatic
         fun endTrackerInfo(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()

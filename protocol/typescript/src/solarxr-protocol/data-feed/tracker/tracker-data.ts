@@ -3,7 +3,10 @@
 import * as flatbuffers from 'flatbuffers';
 
 import { StayAlignedTracker, StayAlignedTrackerT } from '../../../solarxr-protocol/data-feed/stay-aligned/stay-aligned-tracker.js';
+import { AdaptiveDriftState, AdaptiveDriftStateT } from '../../../solarxr-protocol/data-feed/tracker/adaptive-drift-state.js';
+import { FilterHealth, FilterHealthT } from '../../../solarxr-protocol/data-feed/tracker/filter-health.js';
 import { TrackerInfo, TrackerInfoT } from '../../../solarxr-protocol/data-feed/tracker/tracker-info.js';
+import { TrackerRecovery, TrackerRecoveryT } from '../../../solarxr-protocol/data-feed/tracker/tracker-recovery.js';
 import { Temperature, TemperatureT } from '../../../solarxr-protocol/datatypes/temperature.js';
 import { TrackerId, TrackerIdT } from '../../../solarxr-protocol/datatypes/tracker-id.js';
 import { TrackerStatus } from '../../../solarxr-protocol/datatypes/tracker-status.js';
@@ -149,8 +152,32 @@ stayAligned(obj?:StayAlignedTracker):StayAlignedTracker|null {
   return offset ? (obj || new StayAlignedTracker()).__init(this.bb!.__indirect(this.bb_pos + offset), this.bb!) : null;
 }
 
+/**
+ * Server-side compensation and automatic reconnect alignment state.
+ */
+recovery(obj?:TrackerRecovery):TrackerRecovery|null {
+  const offset = this.bb!.__offset(this.bb_pos, 32);
+  return offset ? (obj || new TrackerRecovery()).__init(this.bb!.__indirect(this.bb_pos + offset), this.bb!) : null;
+}
+
+/**
+ * Server-side persistent drift learner state.
+ */
+adaptiveDrift(obj?:AdaptiveDriftState):AdaptiveDriftState|null {
+  const offset = this.bb!.__offset(this.bb_pos, 34);
+  return offset ? (obj || new AdaptiveDriftState()).__init(this.bb!.__indirect(this.bb_pos + offset), this.bb!) : null;
+}
+
+/**
+ * Timestamp-aware filter and packet-stream health.
+ */
+filterHealth(obj?:FilterHealth):FilterHealth|null {
+  const offset = this.bb!.__offset(this.bb_pos, 36);
+  return offset ? (obj || new FilterHealth()).__init(this.bb!.__indirect(this.bb_pos + offset), this.bb!) : null;
+}
+
 static startTrackerData(builder:flatbuffers.Builder) {
-  builder.startObject(14);
+  builder.startObject(17);
 }
 
 static addTrackerId(builder:flatbuffers.Builder, trackerIdOffset:flatbuffers.Offset) {
@@ -209,6 +236,18 @@ static addStayAligned(builder:flatbuffers.Builder, stayAlignedOffset:flatbuffers
   builder.addFieldOffset(13, stayAlignedOffset, 0);
 }
 
+static addRecovery(builder:flatbuffers.Builder, recoveryOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(14, recoveryOffset, 0);
+}
+
+static addAdaptiveDrift(builder:flatbuffers.Builder, adaptiveDriftOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(15, adaptiveDriftOffset, 0);
+}
+
+static addFilterHealth(builder:flatbuffers.Builder, filterHealthOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(16, filterHealthOffset, 0);
+}
+
 static endTrackerData(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
@@ -230,7 +269,10 @@ unpack(): TrackerDataT {
     (this.rotationIdentityAdjusted() !== null ? this.rotationIdentityAdjusted()!.unpack() : null),
     this.tps(),
     (this.rawMagneticVector() !== null ? this.rawMagneticVector()!.unpack() : null),
-    (this.stayAligned() !== null ? this.stayAligned()!.unpack() : null)
+    (this.stayAligned() !== null ? this.stayAligned()!.unpack() : null),
+    (this.recovery() !== null ? this.recovery()!.unpack() : null),
+    (this.adaptiveDrift() !== null ? this.adaptiveDrift()!.unpack() : null),
+    (this.filterHealth() !== null ? this.filterHealth()!.unpack() : null)
   );
 }
 
@@ -250,6 +292,9 @@ unpackTo(_o: TrackerDataT): void {
   _o.tps = this.tps();
   _o.rawMagneticVector = (this.rawMagneticVector() !== null ? this.rawMagneticVector()!.unpack() : null);
   _o.stayAligned = (this.stayAligned() !== null ? this.stayAligned()!.unpack() : null);
+  _o.recovery = (this.recovery() !== null ? this.recovery()!.unpack() : null);
+  _o.adaptiveDrift = (this.adaptiveDrift() !== null ? this.adaptiveDrift()!.unpack() : null);
+  _o.filterHealth = (this.filterHealth() !== null ? this.filterHealth()!.unpack() : null);
 }
 }
 
@@ -268,7 +313,10 @@ constructor(
   public rotationIdentityAdjusted: QuatT|null = null,
   public tps: number|null = null,
   public rawMagneticVector: Vec3fT|null = null,
-  public stayAligned: StayAlignedTrackerT|null = null
+  public stayAligned: StayAlignedTrackerT|null = null,
+  public recovery: TrackerRecoveryT|null = null,
+  public adaptiveDrift: AdaptiveDriftStateT|null = null,
+  public filterHealth: FilterHealthT|null = null
 ){}
 
 
@@ -276,6 +324,9 @@ pack(builder:flatbuffers.Builder): flatbuffers.Offset {
   const trackerId = (this.trackerId !== null ? this.trackerId!.pack(builder) : 0);
   const info = (this.info !== null ? this.info!.pack(builder) : 0);
   const stayAligned = (this.stayAligned !== null ? this.stayAligned!.pack(builder) : 0);
+  const recovery = (this.recovery !== null ? this.recovery!.pack(builder) : 0);
+  const adaptiveDrift = (this.adaptiveDrift !== null ? this.adaptiveDrift!.pack(builder) : 0);
+  const filterHealth = (this.filterHealth !== null ? this.filterHealth!.pack(builder) : 0);
 
   TrackerData.startTrackerData(builder);
   TrackerData.addTrackerId(builder, trackerId);
@@ -293,6 +344,9 @@ pack(builder:flatbuffers.Builder): flatbuffers.Offset {
     TrackerData.addTps(builder, this.tps);
   TrackerData.addRawMagneticVector(builder, (this.rawMagneticVector !== null ? this.rawMagneticVector!.pack(builder) : 0));
   TrackerData.addStayAligned(builder, stayAligned);
+  TrackerData.addRecovery(builder, recovery);
+  TrackerData.addAdaptiveDrift(builder, adaptiveDrift);
+  TrackerData.addFilterHealth(builder, filterHealth);
 
   return TrackerData.endTrackerData(builder);
 }

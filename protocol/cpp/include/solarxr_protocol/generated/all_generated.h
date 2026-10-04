@@ -78,6 +78,15 @@ struct StayAlignedTrackerBuilder;
 
 namespace tracker {
 
+struct TrackerRecovery;
+struct TrackerRecoveryBuilder;
+
+struct AdaptiveDriftState;
+struct AdaptiveDriftStateBuilder;
+
+struct FilterHealth;
+struct FilterHealthBuilder;
+
 struct TrackerData;
 struct TrackerDataBuilder;
 
@@ -190,6 +199,9 @@ struct AssignTrackerRequestBuilder;
 
 struct ClearDriftCompensationRequest;
 struct ClearDriftCompensationRequestBuilder;
+
+struct AdaptiveDriftControlRequest;
+struct AdaptiveDriftControlRequestBuilder;
 
 struct SettingsRequest;
 struct SettingsRequestBuilder;
@@ -601,31 +613,34 @@ enum class FilteringType : uint8_t {
   NONE = 0,
   SMOOTHING = 1,
   PREDICTION = 2,
+  ADAPTIVE_HYBRID = 3,
   MIN = NONE,
-  MAX = PREDICTION
+  MAX = ADAPTIVE_HYBRID
 };
 
-inline const FilteringType (&EnumValuesFilteringType())[3] {
+inline const FilteringType (&EnumValuesFilteringType())[4] {
   static const FilteringType values[] = {
     FilteringType::NONE,
     FilteringType::SMOOTHING,
-    FilteringType::PREDICTION
+    FilteringType::PREDICTION,
+    FilteringType::ADAPTIVE_HYBRID
   };
   return values;
 }
 
 inline const char * const *EnumNamesFilteringType() {
-  static const char * const names[4] = {
+  static const char * const names[5] = {
     "NONE",
     "SMOOTHING",
     "PREDICTION",
+    "ADAPTIVE_HYBRID",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameFilteringType(FilteringType e) {
-  if (flatbuffers::IsOutRange(e, FilteringType::NONE, FilteringType::PREDICTION)) return "";
+  if (flatbuffers::IsOutRange(e, FilteringType::NONE, FilteringType::ADAPTIVE_HYBRID)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesFilteringType()[index];
 }
@@ -1266,6 +1281,192 @@ inline const char *EnumNameTrackerDataType(TrackerDataType e) {
 }  // namespace datatypes
 
 namespace data_feed {
+namespace tracker {
+
+enum class TrackerRecoveryState : uint8_t {
+  NONE = 0,
+  BRIDGING_GAP = 1,
+  COMPENSATING = 2,
+  WAITING_FOR_STILLNESS = 3,
+  VALIDATING = 4,
+  BLENDING = 5,
+  NEEDS_RESET = 6,
+  MIN = NONE,
+  MAX = NEEDS_RESET
+};
+
+inline const TrackerRecoveryState (&EnumValuesTrackerRecoveryState())[7] {
+  static const TrackerRecoveryState values[] = {
+    TrackerRecoveryState::NONE,
+    TrackerRecoveryState::BRIDGING_GAP,
+    TrackerRecoveryState::COMPENSATING,
+    TrackerRecoveryState::WAITING_FOR_STILLNESS,
+    TrackerRecoveryState::VALIDATING,
+    TrackerRecoveryState::BLENDING,
+    TrackerRecoveryState::NEEDS_RESET
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesTrackerRecoveryState() {
+  static const char * const names[8] = {
+    "NONE",
+    "BRIDGING_GAP",
+    "COMPENSATING",
+    "WAITING_FOR_STILLNESS",
+    "VALIDATING",
+    "BLENDING",
+    "NEEDS_RESET",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameTrackerRecoveryState(TrackerRecoveryState e) {
+  if (flatbuffers::IsOutRange(e, TrackerRecoveryState::NONE, TrackerRecoveryState::NEEDS_RESET)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesTrackerRecoveryState()[index];
+}
+
+enum class TrackerRecoveryReason : uint8_t {
+  NONE = 0,
+  TRACKER_OFFLINE = 1,
+  TRACKER_MOVING = 2,
+  POOR_PACKET_RATE = 3,
+  NO_REFERENCE = 4,
+  REFERENCE_DISAGREEMENT = 5,
+  ROLE_OR_MOUNTING_CHANGED = 6,
+  INVALID_ROTATION = 7,
+  MIN = NONE,
+  MAX = INVALID_ROTATION
+};
+
+inline const TrackerRecoveryReason (&EnumValuesTrackerRecoveryReason())[8] {
+  static const TrackerRecoveryReason values[] = {
+    TrackerRecoveryReason::NONE,
+    TrackerRecoveryReason::TRACKER_OFFLINE,
+    TrackerRecoveryReason::TRACKER_MOVING,
+    TrackerRecoveryReason::POOR_PACKET_RATE,
+    TrackerRecoveryReason::NO_REFERENCE,
+    TrackerRecoveryReason::REFERENCE_DISAGREEMENT,
+    TrackerRecoveryReason::ROLE_OR_MOUNTING_CHANGED,
+    TrackerRecoveryReason::INVALID_ROTATION
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesTrackerRecoveryReason() {
+  static const char * const names[9] = {
+    "NONE",
+    "TRACKER_OFFLINE",
+    "TRACKER_MOVING",
+    "POOR_PACKET_RATE",
+    "NO_REFERENCE",
+    "REFERENCE_DISAGREEMENT",
+    "ROLE_OR_MOUNTING_CHANGED",
+    "INVALID_ROTATION",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameTrackerRecoveryReason(TrackerRecoveryReason e) {
+  if (flatbuffers::IsOutRange(e, TrackerRecoveryReason::NONE, TrackerRecoveryReason::INVALID_ROTATION)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesTrackerRecoveryReason()[index];
+}
+
+enum class AdaptiveDriftMode : uint8_t {
+  DISABLED = 0,
+  MONITORING = 1,
+  LEARNING = 2,
+  APPLIED = 3,
+  FROZEN = 4,
+  RECOVERING = 5,
+  MIN = DISABLED,
+  MAX = RECOVERING
+};
+
+inline const AdaptiveDriftMode (&EnumValuesAdaptiveDriftMode())[6] {
+  static const AdaptiveDriftMode values[] = {
+    AdaptiveDriftMode::DISABLED,
+    AdaptiveDriftMode::MONITORING,
+    AdaptiveDriftMode::LEARNING,
+    AdaptiveDriftMode::APPLIED,
+    AdaptiveDriftMode::FROZEN,
+    AdaptiveDriftMode::RECOVERING
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesAdaptiveDriftMode() {
+  static const char * const names[7] = {
+    "DISABLED",
+    "MONITORING",
+    "LEARNING",
+    "APPLIED",
+    "FROZEN",
+    "RECOVERING",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameAdaptiveDriftMode(AdaptiveDriftMode e) {
+  if (flatbuffers::IsOutRange(e, AdaptiveDriftMode::DISABLED, AdaptiveDriftMode::RECOVERING)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesAdaptiveDriftMode()[index];
+}
+
+enum class AdaptiveDriftFreezeReason : uint8_t {
+  NONE = 0,
+  NO_REFERENCE = 1,
+  MOVING = 2,
+  PACKET_QUALITY = 3,
+  REFERENCE_DISAGREEMENT = 4,
+  LOW_CONFIDENCE = 5,
+  RECOVERY = 6,
+  PAUSED = 7,
+  MIN = NONE,
+  MAX = PAUSED
+};
+
+inline const AdaptiveDriftFreezeReason (&EnumValuesAdaptiveDriftFreezeReason())[8] {
+  static const AdaptiveDriftFreezeReason values[] = {
+    AdaptiveDriftFreezeReason::NONE,
+    AdaptiveDriftFreezeReason::NO_REFERENCE,
+    AdaptiveDriftFreezeReason::MOVING,
+    AdaptiveDriftFreezeReason::PACKET_QUALITY,
+    AdaptiveDriftFreezeReason::REFERENCE_DISAGREEMENT,
+    AdaptiveDriftFreezeReason::LOW_CONFIDENCE,
+    AdaptiveDriftFreezeReason::RECOVERY,
+    AdaptiveDriftFreezeReason::PAUSED
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesAdaptiveDriftFreezeReason() {
+  static const char * const names[9] = {
+    "NONE",
+    "NO_REFERENCE",
+    "MOVING",
+    "PACKET_QUALITY",
+    "REFERENCE_DISAGREEMENT",
+    "LOW_CONFIDENCE",
+    "RECOVERY",
+    "PAUSED",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameAdaptiveDriftFreezeReason(AdaptiveDriftFreezeReason e) {
+  if (flatbuffers::IsOutRange(e, AdaptiveDriftFreezeReason::NONE, AdaptiveDriftFreezeReason::PAUSED)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesAdaptiveDriftFreezeReason()[index];
+}
+
+}  // namespace tracker
 
 enum class DataFeedMessage : uint8_t {
   NONE = 0,
@@ -1421,11 +1622,12 @@ enum class RpcMessage : uint8_t {
   OpenUriRequest = 84,
   OpenUriResponse = 85,
   EnableSteamVRDriverRequest = 86,
+  AdaptiveDriftControlRequest = 87,
   MIN = NONE,
-  MAX = EnableSteamVRDriverRequest
+  MAX = AdaptiveDriftControlRequest
 };
 
-inline const RpcMessage (&EnumValuesRpcMessage())[87] {
+inline const RpcMessage (&EnumValuesRpcMessage())[88] {
   static const RpcMessage values[] = {
     RpcMessage::NONE,
     RpcMessage::HeartbeatRequest,
@@ -1513,13 +1715,14 @@ inline const RpcMessage (&EnumValuesRpcMessage())[87] {
     RpcMessage::InstalledInfoResponse,
     RpcMessage::OpenUriRequest,
     RpcMessage::OpenUriResponse,
-    RpcMessage::EnableSteamVRDriverRequest
+    RpcMessage::EnableSteamVRDriverRequest,
+    RpcMessage::AdaptiveDriftControlRequest
   };
   return values;
 }
 
 inline const char * const *EnumNamesRpcMessage() {
-  static const char * const names[88] = {
+  static const char * const names[89] = {
     "NONE",
     "HeartbeatRequest",
     "HeartbeatResponse",
@@ -1607,13 +1810,14 @@ inline const char * const *EnumNamesRpcMessage() {
     "OpenUriRequest",
     "OpenUriResponse",
     "EnableSteamVRDriverRequest",
+    "AdaptiveDriftControlRequest",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameRpcMessage(RpcMessage e) {
-  if (flatbuffers::IsOutRange(e, RpcMessage::NONE, RpcMessage::EnableSteamVRDriverRequest)) return "";
+  if (flatbuffers::IsOutRange(e, RpcMessage::NONE, RpcMessage::AdaptiveDriftControlRequest)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesRpcMessage()[index];
 }
@@ -1966,6 +2170,10 @@ template<> struct RpcMessageTraits<solarxr_protocol::rpc::EnableSteamVRDriverReq
   static const RpcMessage enum_value = RpcMessage::EnableSteamVRDriverRequest;
 };
 
+template<> struct RpcMessageTraits<solarxr_protocol::rpc::AdaptiveDriftControlRequest> {
+  static const RpcMessage enum_value = RpcMessage::AdaptiveDriftControlRequest;
+};
+
 bool VerifyRpcMessage(flatbuffers::Verifier &verifier, const void *obj, RpcMessage type);
 bool VerifyRpcMessageVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<RpcMessage> *types);
 
@@ -2070,6 +2278,48 @@ inline const char *EnumNameResetStatus(ResetStatus e) {
   if (flatbuffers::IsOutRange(e, ResetStatus::STARTED, ResetStatus::FINISHED)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesResetStatus()[index];
+}
+
+enum class AdaptiveDriftAction : uint8_t {
+  PAUSE_LEARNING = 0,
+  RESUME_LEARNING = 1,
+  CLEAR_MODEL = 2,
+  RESTORE_PREVIOUS_MODEL = 3,
+  ENABLE_CORRECTION = 4,
+  DISABLE_CORRECTION = 5,
+  MIN = PAUSE_LEARNING,
+  MAX = DISABLE_CORRECTION
+};
+
+inline const AdaptiveDriftAction (&EnumValuesAdaptiveDriftAction())[6] {
+  static const AdaptiveDriftAction values[] = {
+    AdaptiveDriftAction::PAUSE_LEARNING,
+    AdaptiveDriftAction::RESUME_LEARNING,
+    AdaptiveDriftAction::CLEAR_MODEL,
+    AdaptiveDriftAction::RESTORE_PREVIOUS_MODEL,
+    AdaptiveDriftAction::ENABLE_CORRECTION,
+    AdaptiveDriftAction::DISABLE_CORRECTION
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesAdaptiveDriftAction() {
+  static const char * const names[7] = {
+    "PAUSE_LEARNING",
+    "RESUME_LEARNING",
+    "CLEAR_MODEL",
+    "RESTORE_PREVIOUS_MODEL",
+    "ENABLE_CORRECTION",
+    "DISABLE_CORRECTION",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameAdaptiveDriftAction(AdaptiveDriftAction e) {
+  if (flatbuffers::IsOutRange(e, AdaptiveDriftAction::PAUSE_LEARNING, AdaptiveDriftAction::DISABLE_CORRECTION)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesAdaptiveDriftAction()[index];
 }
 
 enum class ArmsMountingResetMode : uint8_t {
@@ -4232,6 +4482,269 @@ inline flatbuffers::Offset<StayAlignedTracker> CreateStayAlignedTracker(
 
 namespace tracker {
 
+struct TrackerRecovery FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef TrackerRecoveryBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_STATE = 4,
+    VT_PROGRESS = 6,
+    VT_CONFIDENCE = 8,
+    VT_REASON = 10
+  };
+  solarxr_protocol::data_feed::tracker::TrackerRecoveryState state() const {
+    return static_cast<solarxr_protocol::data_feed::tracker::TrackerRecoveryState>(GetField<uint8_t>(VT_STATE, 0));
+  }
+  float progress() const {
+    return GetField<float>(VT_PROGRESS, 0.0f);
+  }
+  float confidence() const {
+    return GetField<float>(VT_CONFIDENCE, 0.0f);
+  }
+  solarxr_protocol::data_feed::tracker::TrackerRecoveryReason reason() const {
+    return static_cast<solarxr_protocol::data_feed::tracker::TrackerRecoveryReason>(GetField<uint8_t>(VT_REASON, 0));
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_STATE, 1) &&
+           VerifyField<float>(verifier, VT_PROGRESS, 4) &&
+           VerifyField<float>(verifier, VT_CONFIDENCE, 4) &&
+           VerifyField<uint8_t>(verifier, VT_REASON, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct TrackerRecoveryBuilder {
+  typedef TrackerRecovery Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_state(solarxr_protocol::data_feed::tracker::TrackerRecoveryState state) {
+    fbb_.AddElement<uint8_t>(TrackerRecovery::VT_STATE, static_cast<uint8_t>(state), 0);
+  }
+  void add_progress(float progress) {
+    fbb_.AddElement<float>(TrackerRecovery::VT_PROGRESS, progress, 0.0f);
+  }
+  void add_confidence(float confidence) {
+    fbb_.AddElement<float>(TrackerRecovery::VT_CONFIDENCE, confidence, 0.0f);
+  }
+  void add_reason(solarxr_protocol::data_feed::tracker::TrackerRecoveryReason reason) {
+    fbb_.AddElement<uint8_t>(TrackerRecovery::VT_REASON, static_cast<uint8_t>(reason), 0);
+  }
+  explicit TrackerRecoveryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  flatbuffers::Offset<TrackerRecovery> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<TrackerRecovery>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<TrackerRecovery> CreateTrackerRecovery(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    solarxr_protocol::data_feed::tracker::TrackerRecoveryState state = solarxr_protocol::data_feed::tracker::TrackerRecoveryState::NONE,
+    float progress = 0.0f,
+    float confidence = 0.0f,
+    solarxr_protocol::data_feed::tracker::TrackerRecoveryReason reason = solarxr_protocol::data_feed::tracker::TrackerRecoveryReason::NONE) {
+  TrackerRecoveryBuilder builder_(_fbb);
+  builder_.add_confidence(confidence);
+  builder_.add_progress(progress);
+  builder_.add_reason(reason);
+  builder_.add_state(state);
+  return builder_.Finish();
+}
+
+struct AdaptiveDriftState FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef AdaptiveDriftStateBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MODE = 4,
+    VT_CONFIDENCE = 6,
+    VT_STABLE_DURATION_MS = 8,
+    VT_LEARNED_RATE_DEG_PER_MIN = 10,
+    VT_APPLIED_CORRECTION_DEG = 12,
+    VT_ACCEPTED_OBSERVATIONS = 14,
+    VT_FREEZE_REASON = 16
+  };
+  solarxr_protocol::data_feed::tracker::AdaptiveDriftMode mode() const {
+    return static_cast<solarxr_protocol::data_feed::tracker::AdaptiveDriftMode>(GetField<uint8_t>(VT_MODE, 0));
+  }
+  float confidence() const {
+    return GetField<float>(VT_CONFIDENCE, 0.0f);
+  }
+  uint64_t stable_duration_ms() const {
+    return GetField<uint64_t>(VT_STABLE_DURATION_MS, 0);
+  }
+  float learned_rate_deg_per_min() const {
+    return GetField<float>(VT_LEARNED_RATE_DEG_PER_MIN, 0.0f);
+  }
+  float applied_correction_deg() const {
+    return GetField<float>(VT_APPLIED_CORRECTION_DEG, 0.0f);
+  }
+  uint32_t accepted_observations() const {
+    return GetField<uint32_t>(VT_ACCEPTED_OBSERVATIONS, 0);
+  }
+  solarxr_protocol::data_feed::tracker::AdaptiveDriftFreezeReason freeze_reason() const {
+    return static_cast<solarxr_protocol::data_feed::tracker::AdaptiveDriftFreezeReason>(GetField<uint8_t>(VT_FREEZE_REASON, 0));
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_MODE, 1) &&
+           VerifyField<float>(verifier, VT_CONFIDENCE, 4) &&
+           VerifyField<uint64_t>(verifier, VT_STABLE_DURATION_MS, 8) &&
+           VerifyField<float>(verifier, VT_LEARNED_RATE_DEG_PER_MIN, 4) &&
+           VerifyField<float>(verifier, VT_APPLIED_CORRECTION_DEG, 4) &&
+           VerifyField<uint32_t>(verifier, VT_ACCEPTED_OBSERVATIONS, 4) &&
+           VerifyField<uint8_t>(verifier, VT_FREEZE_REASON, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct AdaptiveDriftStateBuilder {
+  typedef AdaptiveDriftState Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_mode(solarxr_protocol::data_feed::tracker::AdaptiveDriftMode mode) {
+    fbb_.AddElement<uint8_t>(AdaptiveDriftState::VT_MODE, static_cast<uint8_t>(mode), 0);
+  }
+  void add_confidence(float confidence) {
+    fbb_.AddElement<float>(AdaptiveDriftState::VT_CONFIDENCE, confidence, 0.0f);
+  }
+  void add_stable_duration_ms(uint64_t stable_duration_ms) {
+    fbb_.AddElement<uint64_t>(AdaptiveDriftState::VT_STABLE_DURATION_MS, stable_duration_ms, 0);
+  }
+  void add_learned_rate_deg_per_min(float learned_rate_deg_per_min) {
+    fbb_.AddElement<float>(AdaptiveDriftState::VT_LEARNED_RATE_DEG_PER_MIN, learned_rate_deg_per_min, 0.0f);
+  }
+  void add_applied_correction_deg(float applied_correction_deg) {
+    fbb_.AddElement<float>(AdaptiveDriftState::VT_APPLIED_CORRECTION_DEG, applied_correction_deg, 0.0f);
+  }
+  void add_accepted_observations(uint32_t accepted_observations) {
+    fbb_.AddElement<uint32_t>(AdaptiveDriftState::VT_ACCEPTED_OBSERVATIONS, accepted_observations, 0);
+  }
+  void add_freeze_reason(solarxr_protocol::data_feed::tracker::AdaptiveDriftFreezeReason freeze_reason) {
+    fbb_.AddElement<uint8_t>(AdaptiveDriftState::VT_FREEZE_REASON, static_cast<uint8_t>(freeze_reason), 0);
+  }
+  explicit AdaptiveDriftStateBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  flatbuffers::Offset<AdaptiveDriftState> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<AdaptiveDriftState>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<AdaptiveDriftState> CreateAdaptiveDriftState(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    solarxr_protocol::data_feed::tracker::AdaptiveDriftMode mode = solarxr_protocol::data_feed::tracker::AdaptiveDriftMode::DISABLED,
+    float confidence = 0.0f,
+    uint64_t stable_duration_ms = 0,
+    float learned_rate_deg_per_min = 0.0f,
+    float applied_correction_deg = 0.0f,
+    uint32_t accepted_observations = 0,
+    solarxr_protocol::data_feed::tracker::AdaptiveDriftFreezeReason freeze_reason = solarxr_protocol::data_feed::tracker::AdaptiveDriftFreezeReason::NONE) {
+  AdaptiveDriftStateBuilder builder_(_fbb);
+  builder_.add_stable_duration_ms(stable_duration_ms);
+  builder_.add_accepted_observations(accepted_observations);
+  builder_.add_applied_correction_deg(applied_correction_deg);
+  builder_.add_learned_rate_deg_per_min(learned_rate_deg_per_min);
+  builder_.add_confidence(confidence);
+  builder_.add_freeze_reason(freeze_reason);
+  builder_.add_mode(mode);
+  return builder_.Finish();
+}
+
+struct FilterHealth FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef FilterHealthBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_INPUT_RATE_HZ = 4,
+    VT_PACKET_JITTER_MS = 6,
+    VT_PACKET_LOSS = 8,
+    VT_PREDICTION_HORIZON_MS = 10,
+    VT_EFFECTIVE_LATENCY_MS = 12,
+    VT_FILTERING_IMPACT_RAD = 14
+  };
+  float input_rate_hz() const {
+    return GetField<float>(VT_INPUT_RATE_HZ, 0.0f);
+  }
+  float packet_jitter_ms() const {
+    return GetField<float>(VT_PACKET_JITTER_MS, 0.0f);
+  }
+  float packet_loss() const {
+    return GetField<float>(VT_PACKET_LOSS, 0.0f);
+  }
+  float prediction_horizon_ms() const {
+    return GetField<float>(VT_PREDICTION_HORIZON_MS, 0.0f);
+  }
+  float effective_latency_ms() const {
+    return GetField<float>(VT_EFFECTIVE_LATENCY_MS, 0.0f);
+  }
+  float filtering_impact_rad() const {
+    return GetField<float>(VT_FILTERING_IMPACT_RAD, 0.0f);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<float>(verifier, VT_INPUT_RATE_HZ, 4) &&
+           VerifyField<float>(verifier, VT_PACKET_JITTER_MS, 4) &&
+           VerifyField<float>(verifier, VT_PACKET_LOSS, 4) &&
+           VerifyField<float>(verifier, VT_PREDICTION_HORIZON_MS, 4) &&
+           VerifyField<float>(verifier, VT_EFFECTIVE_LATENCY_MS, 4) &&
+           VerifyField<float>(verifier, VT_FILTERING_IMPACT_RAD, 4) &&
+           verifier.EndTable();
+  }
+};
+
+struct FilterHealthBuilder {
+  typedef FilterHealth Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_input_rate_hz(float input_rate_hz) {
+    fbb_.AddElement<float>(FilterHealth::VT_INPUT_RATE_HZ, input_rate_hz, 0.0f);
+  }
+  void add_packet_jitter_ms(float packet_jitter_ms) {
+    fbb_.AddElement<float>(FilterHealth::VT_PACKET_JITTER_MS, packet_jitter_ms, 0.0f);
+  }
+  void add_packet_loss(float packet_loss) {
+    fbb_.AddElement<float>(FilterHealth::VT_PACKET_LOSS, packet_loss, 0.0f);
+  }
+  void add_prediction_horizon_ms(float prediction_horizon_ms) {
+    fbb_.AddElement<float>(FilterHealth::VT_PREDICTION_HORIZON_MS, prediction_horizon_ms, 0.0f);
+  }
+  void add_effective_latency_ms(float effective_latency_ms) {
+    fbb_.AddElement<float>(FilterHealth::VT_EFFECTIVE_LATENCY_MS, effective_latency_ms, 0.0f);
+  }
+  void add_filtering_impact_rad(float filtering_impact_rad) {
+    fbb_.AddElement<float>(FilterHealth::VT_FILTERING_IMPACT_RAD, filtering_impact_rad, 0.0f);
+  }
+  explicit FilterHealthBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  flatbuffers::Offset<FilterHealth> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<FilterHealth>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<FilterHealth> CreateFilterHealth(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    float input_rate_hz = 0.0f,
+    float packet_jitter_ms = 0.0f,
+    float packet_loss = 0.0f,
+    float prediction_horizon_ms = 0.0f,
+    float effective_latency_ms = 0.0f,
+    float filtering_impact_rad = 0.0f) {
+  FilterHealthBuilder builder_(_fbb);
+  builder_.add_filtering_impact_rad(filtering_impact_rad);
+  builder_.add_effective_latency_ms(effective_latency_ms);
+  builder_.add_prediction_horizon_ms(prediction_horizon_ms);
+  builder_.add_packet_loss(packet_loss);
+  builder_.add_packet_jitter_ms(packet_jitter_ms);
+  builder_.add_input_rate_hz(input_rate_hz);
+  return builder_.Finish();
+}
+
 /// Describes all possible information about a tracker. A tracker is anything that
 /// provides kinematic data about a particular body part.
 ///
@@ -4253,7 +4766,10 @@ struct TrackerData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_ROTATION_IDENTITY_ADJUSTED = 24,
     VT_TPS = 26,
     VT_RAW_MAGNETIC_VECTOR = 28,
-    VT_STAY_ALIGNED = 30
+    VT_STAY_ALIGNED = 30,
+    VT_RECOVERY = 32,
+    VT_ADAPTIVE_DRIFT = 34,
+    VT_FILTER_HEALTH = 36
   };
   const solarxr_protocol::datatypes::TrackerId *tracker_id() const {
     return GetPointer<const solarxr_protocol::datatypes::TrackerId *>(VT_TRACKER_ID);
@@ -4318,6 +4834,18 @@ struct TrackerData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const solarxr_protocol::data_feed::stay_aligned::StayAlignedTracker *stay_aligned() const {
     return GetPointer<const solarxr_protocol::data_feed::stay_aligned::StayAlignedTracker *>(VT_STAY_ALIGNED);
   }
+  /// Server-side compensation and automatic reconnect alignment state.
+  const solarxr_protocol::data_feed::tracker::TrackerRecovery *recovery() const {
+    return GetPointer<const solarxr_protocol::data_feed::tracker::TrackerRecovery *>(VT_RECOVERY);
+  }
+  /// Server-side persistent drift learner state.
+  const solarxr_protocol::data_feed::tracker::AdaptiveDriftState *adaptive_drift() const {
+    return GetPointer<const solarxr_protocol::data_feed::tracker::AdaptiveDriftState *>(VT_ADAPTIVE_DRIFT);
+  }
+  /// Timestamp-aware filter and packet-stream health.
+  const solarxr_protocol::data_feed::tracker::FilterHealth *filter_health() const {
+    return GetPointer<const solarxr_protocol::data_feed::tracker::FilterHealth *>(VT_FILTER_HEALTH);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_TRACKER_ID) &&
@@ -4337,6 +4865,12 @@ struct TrackerData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<solarxr_protocol::datatypes::math::Vec3f>(verifier, VT_RAW_MAGNETIC_VECTOR, 4) &&
            VerifyOffset(verifier, VT_STAY_ALIGNED) &&
            verifier.VerifyTable(stay_aligned()) &&
+           VerifyOffset(verifier, VT_RECOVERY) &&
+           verifier.VerifyTable(recovery()) &&
+           VerifyOffset(verifier, VT_ADAPTIVE_DRIFT) &&
+           verifier.VerifyTable(adaptive_drift()) &&
+           VerifyOffset(verifier, VT_FILTER_HEALTH) &&
+           verifier.VerifyTable(filter_health()) &&
            verifier.EndTable();
   }
 };
@@ -4387,6 +4921,15 @@ struct TrackerDataBuilder {
   void add_stay_aligned(flatbuffers::Offset<solarxr_protocol::data_feed::stay_aligned::StayAlignedTracker> stay_aligned) {
     fbb_.AddOffset(TrackerData::VT_STAY_ALIGNED, stay_aligned);
   }
+  void add_recovery(flatbuffers::Offset<solarxr_protocol::data_feed::tracker::TrackerRecovery> recovery) {
+    fbb_.AddOffset(TrackerData::VT_RECOVERY, recovery);
+  }
+  void add_adaptive_drift(flatbuffers::Offset<solarxr_protocol::data_feed::tracker::AdaptiveDriftState> adaptive_drift) {
+    fbb_.AddOffset(TrackerData::VT_ADAPTIVE_DRIFT, adaptive_drift);
+  }
+  void add_filter_health(flatbuffers::Offset<solarxr_protocol::data_feed::tracker::FilterHealth> filter_health) {
+    fbb_.AddOffset(TrackerData::VT_FILTER_HEALTH, filter_health);
+  }
   explicit TrackerDataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -4413,8 +4956,14 @@ inline flatbuffers::Offset<TrackerData> CreateTrackerData(
     const solarxr_protocol::datatypes::math::Quat *rotation_identity_adjusted = nullptr,
     flatbuffers::Optional<uint16_t> tps = flatbuffers::nullopt,
     const solarxr_protocol::datatypes::math::Vec3f *raw_magnetic_vector = nullptr,
-    flatbuffers::Offset<solarxr_protocol::data_feed::stay_aligned::StayAlignedTracker> stay_aligned = 0) {
+    flatbuffers::Offset<solarxr_protocol::data_feed::stay_aligned::StayAlignedTracker> stay_aligned = 0,
+    flatbuffers::Offset<solarxr_protocol::data_feed::tracker::TrackerRecovery> recovery = 0,
+    flatbuffers::Offset<solarxr_protocol::data_feed::tracker::AdaptiveDriftState> adaptive_drift = 0,
+    flatbuffers::Offset<solarxr_protocol::data_feed::tracker::FilterHealth> filter_health = 0) {
   TrackerDataBuilder builder_(_fbb);
+  builder_.add_filter_health(filter_health);
+  builder_.add_adaptive_drift(adaptive_drift);
+  builder_.add_recovery(recovery);
   builder_.add_stay_aligned(stay_aligned);
   builder_.add_raw_magnetic_vector(raw_magnetic_vector);
   builder_.add_rotation_identity_adjusted(rotation_identity_adjusted);
@@ -4448,7 +4997,10 @@ struct TrackerDataMask FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_ROTATION_IDENTITY_ADJUSTED = 22,
     VT_TPS = 24,
     VT_RAW_MAGNETIC_VECTOR = 26,
-    VT_STAY_ALIGNED = 28
+    VT_STAY_ALIGNED = 28,
+    VT_RECOVERY = 30,
+    VT_ADAPTIVE_DRIFT = 32,
+    VT_FILTER_HEALTH = 34
   };
   bool info() const {
     return GetField<uint8_t>(VT_INFO, 0) != 0;
@@ -4489,6 +5041,15 @@ struct TrackerDataMask FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool stay_aligned() const {
     return GetField<uint8_t>(VT_STAY_ALIGNED, 0) != 0;
   }
+  bool recovery() const {
+    return GetField<uint8_t>(VT_RECOVERY, 0) != 0;
+  }
+  bool adaptive_drift() const {
+    return GetField<uint8_t>(VT_ADAPTIVE_DRIFT, 0) != 0;
+  }
+  bool filter_health() const {
+    return GetField<uint8_t>(VT_FILTER_HEALTH, 0) != 0;
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_INFO, 1) &&
@@ -4504,6 +5065,9 @@ struct TrackerDataMask FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_TPS, 1) &&
            VerifyField<uint8_t>(verifier, VT_RAW_MAGNETIC_VECTOR, 1) &&
            VerifyField<uint8_t>(verifier, VT_STAY_ALIGNED, 1) &&
+           VerifyField<uint8_t>(verifier, VT_RECOVERY, 1) &&
+           VerifyField<uint8_t>(verifier, VT_ADAPTIVE_DRIFT, 1) &&
+           VerifyField<uint8_t>(verifier, VT_FILTER_HEALTH, 1) &&
            verifier.EndTable();
   }
 };
@@ -4551,6 +5115,15 @@ struct TrackerDataMaskBuilder {
   void add_stay_aligned(bool stay_aligned) {
     fbb_.AddElement<uint8_t>(TrackerDataMask::VT_STAY_ALIGNED, static_cast<uint8_t>(stay_aligned), 0);
   }
+  void add_recovery(bool recovery) {
+    fbb_.AddElement<uint8_t>(TrackerDataMask::VT_RECOVERY, static_cast<uint8_t>(recovery), 0);
+  }
+  void add_adaptive_drift(bool adaptive_drift) {
+    fbb_.AddElement<uint8_t>(TrackerDataMask::VT_ADAPTIVE_DRIFT, static_cast<uint8_t>(adaptive_drift), 0);
+  }
+  void add_filter_health(bool filter_health) {
+    fbb_.AddElement<uint8_t>(TrackerDataMask::VT_FILTER_HEALTH, static_cast<uint8_t>(filter_health), 0);
+  }
   explicit TrackerDataMaskBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -4576,8 +5149,14 @@ inline flatbuffers::Offset<TrackerDataMask> CreateTrackerDataMask(
     bool rotation_identity_adjusted = false,
     bool tps = false,
     bool raw_magnetic_vector = false,
-    bool stay_aligned = false) {
+    bool stay_aligned = false,
+    bool recovery = false,
+    bool adaptive_drift = false,
+    bool filter_health = false) {
   TrackerDataMaskBuilder builder_(_fbb);
+  builder_.add_filter_health(filter_health);
+  builder_.add_adaptive_drift(adaptive_drift);
+  builder_.add_recovery(recovery);
   builder_.add_stay_aligned(stay_aligned);
   builder_.add_raw_magnetic_vector(raw_magnetic_vector);
   builder_.add_tps(tps);
@@ -4611,7 +5190,11 @@ struct TrackerInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_MOUNTING_RESET_ORIENTATION = 24,
     VT_IS_HMD = 26,
     VT_MAGNETOMETER = 28,
-    VT_DATA_SUPPORT = 30
+    VT_DATA_SUPPORT = 30,
+    VT_LEARNED_DRIFT_RATE_DEG_PER_MIN = 32,
+    VT_TOTAL_DRIFT_OBSERVATIONS = 34,
+    VT_AUTO_LEARN_DRIFT = 36,
+    VT_IMU_PROFILE_OVERRIDE = 38
   };
   solarxr_protocol::datatypes::hardware_info::ImuType imu_type() const {
     return static_cast<solarxr_protocol::datatypes::hardware_info::ImuType>(GetField<uint16_t>(VT_IMU_TYPE, 0));
@@ -4669,6 +5252,22 @@ struct TrackerInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   solarxr_protocol::datatypes::hardware_info::TrackerDataType data_support() const {
     return static_cast<solarxr_protocol::datatypes::hardware_info::TrackerDataType>(GetField<uint8_t>(VT_DATA_SUPPORT, 0));
   }
+  /// Signed learned yaw drift compensation rate in degrees per minute.
+  float learned_drift_rate_deg_per_min() const {
+    return GetField<float>(VT_LEARNED_DRIFT_RATE_DEG_PER_MIN, 0.0f);
+  }
+  /// Number of accepted drift observations used to update the learned rate.
+  uint32_t total_drift_observations() const {
+    return GetField<uint32_t>(VT_TOTAL_DRIFT_OBSERVATIONS, 0);
+  }
+  /// Whether this tracker is currently allowed to learn drift across resets.
+  bool auto_learn_drift() const {
+    return GetField<uint8_t>(VT_AUTO_LEARN_DRIFT, 1) != 0;
+  }
+  /// Server-owned IMU profile override, or null for automatic detection.
+  const flatbuffers::String *imu_profile_override() const {
+    return GetPointer<const flatbuffers::String *>(VT_IMU_PROFILE_OVERRIDE);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint16_t>(verifier, VT_IMU_TYPE, 2) &&
@@ -4687,6 +5286,11 @@ struct TrackerInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_IS_HMD, 1) &&
            VerifyField<uint8_t>(verifier, VT_MAGNETOMETER, 1) &&
            VerifyField<uint8_t>(verifier, VT_DATA_SUPPORT, 1) &&
+           VerifyField<float>(verifier, VT_LEARNED_DRIFT_RATE_DEG_PER_MIN, 4) &&
+           VerifyField<uint32_t>(verifier, VT_TOTAL_DRIFT_OBSERVATIONS, 4) &&
+           VerifyField<uint8_t>(verifier, VT_AUTO_LEARN_DRIFT, 1) &&
+           VerifyOffset(verifier, VT_IMU_PROFILE_OVERRIDE) &&
+           verifier.VerifyString(imu_profile_override()) &&
            verifier.EndTable();
   }
 };
@@ -4737,6 +5341,18 @@ struct TrackerInfoBuilder {
   void add_data_support(solarxr_protocol::datatypes::hardware_info::TrackerDataType data_support) {
     fbb_.AddElement<uint8_t>(TrackerInfo::VT_DATA_SUPPORT, static_cast<uint8_t>(data_support), 0);
   }
+  void add_learned_drift_rate_deg_per_min(float learned_drift_rate_deg_per_min) {
+    fbb_.AddElement<float>(TrackerInfo::VT_LEARNED_DRIFT_RATE_DEG_PER_MIN, learned_drift_rate_deg_per_min, 0.0f);
+  }
+  void add_total_drift_observations(uint32_t total_drift_observations) {
+    fbb_.AddElement<uint32_t>(TrackerInfo::VT_TOTAL_DRIFT_OBSERVATIONS, total_drift_observations, 0);
+  }
+  void add_auto_learn_drift(bool auto_learn_drift) {
+    fbb_.AddElement<uint8_t>(TrackerInfo::VT_AUTO_LEARN_DRIFT, static_cast<uint8_t>(auto_learn_drift), 1);
+  }
+  void add_imu_profile_override(flatbuffers::Offset<flatbuffers::String> imu_profile_override) {
+    fbb_.AddOffset(TrackerInfo::VT_IMU_PROFILE_OVERRIDE, imu_profile_override);
+  }
   explicit TrackerInfoBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -4763,14 +5379,22 @@ inline flatbuffers::Offset<TrackerInfo> CreateTrackerInfo(
     const solarxr_protocol::datatypes::math::Quat *mounting_reset_orientation = nullptr,
     bool is_hmd = false,
     solarxr_protocol::datatypes::MagnetometerStatus magnetometer = solarxr_protocol::datatypes::MagnetometerStatus::NOT_SUPPORTED,
-    solarxr_protocol::datatypes::hardware_info::TrackerDataType data_support = solarxr_protocol::datatypes::hardware_info::TrackerDataType::ROTATION) {
+    solarxr_protocol::datatypes::hardware_info::TrackerDataType data_support = solarxr_protocol::datatypes::hardware_info::TrackerDataType::ROTATION,
+    float learned_drift_rate_deg_per_min = 0.0f,
+    uint32_t total_drift_observations = 0,
+    bool auto_learn_drift = true,
+    flatbuffers::Offset<flatbuffers::String> imu_profile_override = 0) {
   TrackerInfoBuilder builder_(_fbb);
+  builder_.add_imu_profile_override(imu_profile_override);
+  builder_.add_total_drift_observations(total_drift_observations);
+  builder_.add_learned_drift_rate_deg_per_min(learned_drift_rate_deg_per_min);
   builder_.add_mounting_reset_orientation(mounting_reset_orientation);
   builder_.add_custom_name(custom_name);
   builder_.add_display_name(display_name);
   builder_.add_mounting_orientation(mounting_orientation);
   builder_.add_poll_rate(poll_rate);
   builder_.add_imu_type(imu_type);
+  builder_.add_auto_learn_drift(auto_learn_drift);
   builder_.add_data_support(data_support);
   builder_.add_magnetometer(magnetometer);
   builder_.add_is_hmd(is_hmd);
@@ -4797,9 +5421,14 @@ inline flatbuffers::Offset<TrackerInfo> CreateTrackerInfoDirect(
     const solarxr_protocol::datatypes::math::Quat *mounting_reset_orientation = nullptr,
     bool is_hmd = false,
     solarxr_protocol::datatypes::MagnetometerStatus magnetometer = solarxr_protocol::datatypes::MagnetometerStatus::NOT_SUPPORTED,
-    solarxr_protocol::datatypes::hardware_info::TrackerDataType data_support = solarxr_protocol::datatypes::hardware_info::TrackerDataType::ROTATION) {
+    solarxr_protocol::datatypes::hardware_info::TrackerDataType data_support = solarxr_protocol::datatypes::hardware_info::TrackerDataType::ROTATION,
+    float learned_drift_rate_deg_per_min = 0.0f,
+    uint32_t total_drift_observations = 0,
+    bool auto_learn_drift = true,
+    const char *imu_profile_override = nullptr) {
   auto display_name__ = display_name ? _fbb.CreateString(display_name) : 0;
   auto custom_name__ = custom_name ? _fbb.CreateString(custom_name) : 0;
+  auto imu_profile_override__ = imu_profile_override ? _fbb.CreateString(imu_profile_override) : 0;
   return solarxr_protocol::data_feed::tracker::CreateTrackerInfo(
       _fbb,
       imu_type,
@@ -4815,7 +5444,11 @@ inline flatbuffers::Offset<TrackerInfo> CreateTrackerInfoDirect(
       mounting_reset_orientation,
       is_hmd,
       magnetometer,
-      data_support);
+      data_support,
+      learned_drift_rate_deg_per_min,
+      total_drift_observations,
+      auto_learn_drift,
+      imu_profile_override__);
 }
 
 }  // namespace tracker
@@ -5858,7 +6491,12 @@ struct SkeletonHeight FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef SkeletonHeightBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_HMD_HEIGHT = 4,
-    VT_FLOOR_HEIGHT = 6
+    VT_FLOOR_HEIGHT = 6,
+    VT_OSC_RATE = 8,
+    VT_CHATBOX_ENABLED = 10,
+    VT_CHATBOX_TRIGGER = 12,
+    VT_CHATBOX_MESSAGE = 14,
+    VT_CHATBOX_ONLY = 16
   };
   flatbuffers::Optional<float> hmd_height() const {
     return GetOptional<float, float>(VT_HMD_HEIGHT);
@@ -5866,10 +6504,31 @@ struct SkeletonHeight FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Optional<float> floor_height() const {
     return GetOptional<float, float>(VT_FLOOR_HEIGHT);
   }
+  flatbuffers::Optional<int32_t> osc_rate() const {
+    return GetOptional<int32_t, int32_t>(VT_OSC_RATE);
+  }
+  flatbuffers::Optional<bool> chatbox_enabled() const {
+    return GetOptional<uint8_t, bool>(VT_CHATBOX_ENABLED);
+  }
+  flatbuffers::Optional<bool> chatbox_trigger() const {
+    return GetOptional<uint8_t, bool>(VT_CHATBOX_TRIGGER);
+  }
+  const flatbuffers::String *chatbox_message() const {
+    return GetPointer<const flatbuffers::String *>(VT_CHATBOX_MESSAGE);
+  }
+  flatbuffers::Optional<bool> chatbox_only() const {
+    return GetOptional<uint8_t, bool>(VT_CHATBOX_ONLY);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<float>(verifier, VT_HMD_HEIGHT, 4) &&
            VerifyField<float>(verifier, VT_FLOOR_HEIGHT, 4) &&
+           VerifyField<int32_t>(verifier, VT_OSC_RATE, 4) &&
+           VerifyField<uint8_t>(verifier, VT_CHATBOX_ENABLED, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CHATBOX_TRIGGER, 1) &&
+           VerifyOffset(verifier, VT_CHATBOX_MESSAGE) &&
+           verifier.VerifyString(chatbox_message()) &&
+           VerifyField<uint8_t>(verifier, VT_CHATBOX_ONLY, 1) &&
            verifier.EndTable();
   }
 };
@@ -5883,6 +6542,21 @@ struct SkeletonHeightBuilder {
   }
   void add_floor_height(float floor_height) {
     fbb_.AddElement<float>(SkeletonHeight::VT_FLOOR_HEIGHT, floor_height);
+  }
+  void add_osc_rate(int32_t osc_rate) {
+    fbb_.AddElement<int32_t>(SkeletonHeight::VT_OSC_RATE, osc_rate);
+  }
+  void add_chatbox_enabled(bool chatbox_enabled) {
+    fbb_.AddElement<uint8_t>(SkeletonHeight::VT_CHATBOX_ENABLED, static_cast<uint8_t>(chatbox_enabled));
+  }
+  void add_chatbox_trigger(bool chatbox_trigger) {
+    fbb_.AddElement<uint8_t>(SkeletonHeight::VT_CHATBOX_TRIGGER, static_cast<uint8_t>(chatbox_trigger));
+  }
+  void add_chatbox_message(flatbuffers::Offset<flatbuffers::String> chatbox_message) {
+    fbb_.AddOffset(SkeletonHeight::VT_CHATBOX_MESSAGE, chatbox_message);
+  }
+  void add_chatbox_only(bool chatbox_only) {
+    fbb_.AddElement<uint8_t>(SkeletonHeight::VT_CHATBOX_ONLY, static_cast<uint8_t>(chatbox_only));
   }
   explicit SkeletonHeightBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -5898,11 +6572,42 @@ struct SkeletonHeightBuilder {
 inline flatbuffers::Offset<SkeletonHeight> CreateSkeletonHeight(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Optional<float> hmd_height = flatbuffers::nullopt,
-    flatbuffers::Optional<float> floor_height = flatbuffers::nullopt) {
+    flatbuffers::Optional<float> floor_height = flatbuffers::nullopt,
+    flatbuffers::Optional<int32_t> osc_rate = flatbuffers::nullopt,
+    flatbuffers::Optional<bool> chatbox_enabled = flatbuffers::nullopt,
+    flatbuffers::Optional<bool> chatbox_trigger = flatbuffers::nullopt,
+    flatbuffers::Offset<flatbuffers::String> chatbox_message = 0,
+    flatbuffers::Optional<bool> chatbox_only = flatbuffers::nullopt) {
   SkeletonHeightBuilder builder_(_fbb);
+  builder_.add_chatbox_message(chatbox_message);
+  if(osc_rate) { builder_.add_osc_rate(*osc_rate); }
   if(floor_height) { builder_.add_floor_height(*floor_height); }
   if(hmd_height) { builder_.add_hmd_height(*hmd_height); }
+  if(chatbox_only) { builder_.add_chatbox_only(*chatbox_only); }
+  if(chatbox_trigger) { builder_.add_chatbox_trigger(*chatbox_trigger); }
+  if(chatbox_enabled) { builder_.add_chatbox_enabled(*chatbox_enabled); }
   return builder_.Finish();
+}
+
+inline flatbuffers::Offset<SkeletonHeight> CreateSkeletonHeightDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Optional<float> hmd_height = flatbuffers::nullopt,
+    flatbuffers::Optional<float> floor_height = flatbuffers::nullopt,
+    flatbuffers::Optional<int32_t> osc_rate = flatbuffers::nullopt,
+    flatbuffers::Optional<bool> chatbox_enabled = flatbuffers::nullopt,
+    flatbuffers::Optional<bool> chatbox_trigger = flatbuffers::nullopt,
+    const char *chatbox_message = nullptr,
+    flatbuffers::Optional<bool> chatbox_only = flatbuffers::nullopt) {
+  auto chatbox_message__ = chatbox_message ? _fbb.CreateString(chatbox_message) : 0;
+  return solarxr_protocol::rpc::settings::CreateSkeletonHeight(
+      _fbb,
+      hmd_height,
+      floor_height,
+      osc_rate,
+      chatbox_enabled,
+      chatbox_trigger,
+      chatbox_message__,
+      chatbox_only);
 }
 
 /// Settings for the skeletal model.
@@ -6569,6 +7274,9 @@ struct RpcMessageHeader FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const solarxr_protocol::rpc::EnableSteamVRDriverRequest *message_as_EnableSteamVRDriverRequest() const {
     return message_type() == solarxr_protocol::rpc::RpcMessage::EnableSteamVRDriverRequest ? static_cast<const solarxr_protocol::rpc::EnableSteamVRDriverRequest *>(message()) : nullptr;
   }
+  const solarxr_protocol::rpc::AdaptiveDriftControlRequest *message_as_AdaptiveDriftControlRequest() const {
+    return message_type() == solarxr_protocol::rpc::RpcMessage::AdaptiveDriftControlRequest ? static_cast<const solarxr_protocol::rpc::AdaptiveDriftControlRequest *>(message()) : nullptr;
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<solarxr_protocol::datatypes::TransactionId>(verifier, VT_TX_ID, 4) &&
@@ -6921,6 +7629,10 @@ template<> inline const solarxr_protocol::rpc::OpenUriResponse *RpcMessageHeader
 
 template<> inline const solarxr_protocol::rpc::EnableSteamVRDriverRequest *RpcMessageHeader::message_as<solarxr_protocol::rpc::EnableSteamVRDriverRequest>() const {
   return message_as_EnableSteamVRDriverRequest();
+}
+
+template<> inline const solarxr_protocol::rpc::AdaptiveDriftControlRequest *RpcMessageHeader::message_as<solarxr_protocol::rpc::AdaptiveDriftControlRequest>() const {
+  return message_as_AdaptiveDriftControlRequest();
 }
 
 struct RpcMessageHeaderBuilder {
@@ -7283,7 +7995,8 @@ struct AssignTrackerRequest FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table
     VT_BODY_POSITION = 6,
     VT_MOUNTING_ORIENTATION = 8,
     VT_DISPLAY_NAME = 10,
-    VT_ALLOW_DRIFT_COMPENSATION = 12
+    VT_ALLOW_DRIFT_COMPENSATION = 12,
+    VT_IMU_PROFILE_OVERRIDE = 14
   };
   const solarxr_protocol::datatypes::TrackerId *tracker_id() const {
     return GetPointer<const solarxr_protocol::datatypes::TrackerId *>(VT_TRACKER_ID);
@@ -7300,6 +8013,10 @@ struct AssignTrackerRequest FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table
   bool allow_drift_compensation() const {
     return GetField<uint8_t>(VT_ALLOW_DRIFT_COMPENSATION, 0) != 0;
   }
+  /// Optional server-owned IMU profile override. Null preserves the current value.
+  const flatbuffers::String *imu_profile_override() const {
+    return GetPointer<const flatbuffers::String *>(VT_IMU_PROFILE_OVERRIDE);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_TRACKER_ID) &&
@@ -7309,6 +8026,8 @@ struct AssignTrackerRequest FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table
            VerifyOffset(verifier, VT_DISPLAY_NAME) &&
            verifier.VerifyString(display_name()) &&
            VerifyField<uint8_t>(verifier, VT_ALLOW_DRIFT_COMPENSATION, 1) &&
+           VerifyOffset(verifier, VT_IMU_PROFILE_OVERRIDE) &&
+           verifier.VerifyString(imu_profile_override()) &&
            verifier.EndTable();
   }
 };
@@ -7332,6 +8051,9 @@ struct AssignTrackerRequestBuilder {
   void add_allow_drift_compensation(bool allow_drift_compensation) {
     fbb_.AddElement<uint8_t>(AssignTrackerRequest::VT_ALLOW_DRIFT_COMPENSATION, static_cast<uint8_t>(allow_drift_compensation), 0);
   }
+  void add_imu_profile_override(flatbuffers::Offset<flatbuffers::String> imu_profile_override) {
+    fbb_.AddOffset(AssignTrackerRequest::VT_IMU_PROFILE_OVERRIDE, imu_profile_override);
+  }
   explicit AssignTrackerRequestBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -7349,8 +8071,10 @@ inline flatbuffers::Offset<AssignTrackerRequest> CreateAssignTrackerRequest(
     solarxr_protocol::datatypes::BodyPart body_position = solarxr_protocol::datatypes::BodyPart::NONE,
     const solarxr_protocol::datatypes::math::Quat *mounting_orientation = nullptr,
     flatbuffers::Offset<flatbuffers::String> display_name = 0,
-    bool allow_drift_compensation = false) {
+    bool allow_drift_compensation = false,
+    flatbuffers::Offset<flatbuffers::String> imu_profile_override = 0) {
   AssignTrackerRequestBuilder builder_(_fbb);
+  builder_.add_imu_profile_override(imu_profile_override);
   builder_.add_display_name(display_name);
   builder_.add_mounting_orientation(mounting_orientation);
   builder_.add_tracker_id(tracker_id);
@@ -7365,21 +8089,33 @@ inline flatbuffers::Offset<AssignTrackerRequest> CreateAssignTrackerRequestDirec
     solarxr_protocol::datatypes::BodyPart body_position = solarxr_protocol::datatypes::BodyPart::NONE,
     const solarxr_protocol::datatypes::math::Quat *mounting_orientation = nullptr,
     const char *display_name = nullptr,
-    bool allow_drift_compensation = false) {
+    bool allow_drift_compensation = false,
+    const char *imu_profile_override = nullptr) {
   auto display_name__ = display_name ? _fbb.CreateString(display_name) : 0;
+  auto imu_profile_override__ = imu_profile_override ? _fbb.CreateString(imu_profile_override) : 0;
   return solarxr_protocol::rpc::CreateAssignTrackerRequest(
       _fbb,
       tracker_id,
       body_position,
       mounting_orientation,
       display_name__,
-      allow_drift_compensation);
+      allow_drift_compensation,
+      imu_profile_override__);
 }
 
 struct ClearDriftCompensationRequest FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef ClearDriftCompensationRequestBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_TRACKER_ID = 4
+  };
+  /// Optional tracker to clear. Null retains the legacy all-trackers behavior.
+  const solarxr_protocol::datatypes::TrackerId *tracker_id() const {
+    return GetPointer<const solarxr_protocol::datatypes::TrackerId *>(VT_TRACKER_ID);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_TRACKER_ID) &&
+           verifier.VerifyTable(tracker_id()) &&
            verifier.EndTable();
   }
 };
@@ -7388,6 +8124,9 @@ struct ClearDriftCompensationRequestBuilder {
   typedef ClearDriftCompensationRequest Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_tracker_id(flatbuffers::Offset<solarxr_protocol::datatypes::TrackerId> tracker_id) {
+    fbb_.AddOffset(ClearDriftCompensationRequest::VT_TRACKER_ID, tracker_id);
+  }
   explicit ClearDriftCompensationRequestBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -7400,8 +8139,62 @@ struct ClearDriftCompensationRequestBuilder {
 };
 
 inline flatbuffers::Offset<ClearDriftCompensationRequest> CreateClearDriftCompensationRequest(
-    flatbuffers::FlatBufferBuilder &_fbb) {
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<solarxr_protocol::datatypes::TrackerId> tracker_id = 0) {
   ClearDriftCompensationRequestBuilder builder_(_fbb);
+  builder_.add_tracker_id(tracker_id);
+  return builder_.Finish();
+}
+
+struct AdaptiveDriftControlRequest FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef AdaptiveDriftControlRequestBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_TRACKER_ID = 4,
+    VT_ACTION = 6
+  };
+  const solarxr_protocol::datatypes::TrackerId *tracker_id() const {
+    return GetPointer<const solarxr_protocol::datatypes::TrackerId *>(VT_TRACKER_ID);
+  }
+  solarxr_protocol::rpc::AdaptiveDriftAction action() const {
+    return static_cast<solarxr_protocol::rpc::AdaptiveDriftAction>(GetField<uint8_t>(VT_ACTION, 0));
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_TRACKER_ID) &&
+           verifier.VerifyTable(tracker_id()) &&
+           VerifyField<uint8_t>(verifier, VT_ACTION, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct AdaptiveDriftControlRequestBuilder {
+  typedef AdaptiveDriftControlRequest Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_tracker_id(flatbuffers::Offset<solarxr_protocol::datatypes::TrackerId> tracker_id) {
+    fbb_.AddOffset(AdaptiveDriftControlRequest::VT_TRACKER_ID, tracker_id);
+  }
+  void add_action(solarxr_protocol::rpc::AdaptiveDriftAction action) {
+    fbb_.AddElement<uint8_t>(AdaptiveDriftControlRequest::VT_ACTION, static_cast<uint8_t>(action), 0);
+  }
+  explicit AdaptiveDriftControlRequestBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  flatbuffers::Offset<AdaptiveDriftControlRequest> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<AdaptiveDriftControlRequest>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<AdaptiveDriftControlRequest> CreateAdaptiveDriftControlRequest(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<solarxr_protocol::datatypes::TrackerId> tracker_id = 0,
+    solarxr_protocol::rpc::AdaptiveDriftAction action = solarxr_protocol::rpc::AdaptiveDriftAction::PAUSE_LEARNING) {
+  AdaptiveDriftControlRequestBuilder builder_(_fbb);
+  builder_.add_tracker_id(tracker_id);
+  builder_.add_action(action);
   return builder_.Finish();
 }
 
@@ -8684,7 +9477,10 @@ struct ResetsSettings FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_ARMS_MOUNTING_RESET_MODE = 6,
     VT_YAW_RESET_SMOOTH_TIME = 8,
     VT_SAVE_MOUNTING_RESET = 10,
-    VT_RESET_HMD_PITCH = 12
+    VT_RESET_HMD_PITCH = 12,
+    VT_DEAD_TRACKER_RECOVERY_ENABLED = 14,
+    VT_RECOVERY_CHATBOX_NOTIFICATIONS = 16,
+    VT_RECOVERY_SETTINGS_PRESENT = 18
   };
   bool reset_mounting_feet() const {
     return GetField<uint8_t>(VT_RESET_MOUNTING_FEET, 0) != 0;
@@ -8701,6 +9497,15 @@ struct ResetsSettings FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool reset_hmd_pitch() const {
     return GetField<uint8_t>(VT_RESET_HMD_PITCH, 0) != 0;
   }
+  bool dead_tracker_recovery_enabled() const {
+    return GetField<uint8_t>(VT_DEAD_TRACKER_RECOVERY_ENABLED, 1) != 0;
+  }
+  bool recovery_chatbox_notifications() const {
+    return GetField<uint8_t>(VT_RECOVERY_CHATBOX_NOTIFICATIONS, 1) != 0;
+  }
+  bool recovery_settings_present() const {
+    return GetField<uint8_t>(VT_RECOVERY_SETTINGS_PRESENT, 0) != 0;
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_RESET_MOUNTING_FEET, 1) &&
@@ -8708,6 +9513,9 @@ struct ResetsSettings FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<float>(verifier, VT_YAW_RESET_SMOOTH_TIME, 4) &&
            VerifyField<uint8_t>(verifier, VT_SAVE_MOUNTING_RESET, 1) &&
            VerifyField<uint8_t>(verifier, VT_RESET_HMD_PITCH, 1) &&
+           VerifyField<uint8_t>(verifier, VT_DEAD_TRACKER_RECOVERY_ENABLED, 1) &&
+           VerifyField<uint8_t>(verifier, VT_RECOVERY_CHATBOX_NOTIFICATIONS, 1) &&
+           VerifyField<uint8_t>(verifier, VT_RECOVERY_SETTINGS_PRESENT, 1) &&
            verifier.EndTable();
   }
 };
@@ -8731,6 +9539,15 @@ struct ResetsSettingsBuilder {
   void add_reset_hmd_pitch(bool reset_hmd_pitch) {
     fbb_.AddElement<uint8_t>(ResetsSettings::VT_RESET_HMD_PITCH, static_cast<uint8_t>(reset_hmd_pitch), 0);
   }
+  void add_dead_tracker_recovery_enabled(bool dead_tracker_recovery_enabled) {
+    fbb_.AddElement<uint8_t>(ResetsSettings::VT_DEAD_TRACKER_RECOVERY_ENABLED, static_cast<uint8_t>(dead_tracker_recovery_enabled), 1);
+  }
+  void add_recovery_chatbox_notifications(bool recovery_chatbox_notifications) {
+    fbb_.AddElement<uint8_t>(ResetsSettings::VT_RECOVERY_CHATBOX_NOTIFICATIONS, static_cast<uint8_t>(recovery_chatbox_notifications), 1);
+  }
+  void add_recovery_settings_present(bool recovery_settings_present) {
+    fbb_.AddElement<uint8_t>(ResetsSettings::VT_RECOVERY_SETTINGS_PRESENT, static_cast<uint8_t>(recovery_settings_present), 0);
+  }
   explicit ResetsSettingsBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -8748,9 +9565,15 @@ inline flatbuffers::Offset<ResetsSettings> CreateResetsSettings(
     solarxr_protocol::rpc::ArmsMountingResetMode arms_mounting_reset_mode = solarxr_protocol::rpc::ArmsMountingResetMode::BACK,
     float yaw_reset_smooth_time = 0.0f,
     bool save_mounting_reset = false,
-    bool reset_hmd_pitch = false) {
+    bool reset_hmd_pitch = false,
+    bool dead_tracker_recovery_enabled = true,
+    bool recovery_chatbox_notifications = true,
+    bool recovery_settings_present = false) {
   ResetsSettingsBuilder builder_(_fbb);
   builder_.add_yaw_reset_smooth_time(yaw_reset_smooth_time);
+  builder_.add_recovery_settings_present(recovery_settings_present);
+  builder_.add_recovery_chatbox_notifications(recovery_chatbox_notifications);
+  builder_.add_dead_tracker_recovery_enabled(dead_tracker_recovery_enabled);
   builder_.add_reset_hmd_pitch(reset_hmd_pitch);
   builder_.add_save_mounting_reset(save_mounting_reset);
   builder_.add_arms_mounting_reset_mode(arms_mounting_reset_mode);
@@ -15407,6 +16230,10 @@ inline bool VerifyRpcMessage(flatbuffers::Verifier &verifier, const void *obj, R
     }
     case RpcMessage::EnableSteamVRDriverRequest: {
       auto ptr = reinterpret_cast<const solarxr_protocol::rpc::EnableSteamVRDriverRequest *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case RpcMessage::AdaptiveDriftControlRequest: {
+      auto ptr = reinterpret_cast<const solarxr_protocol::rpc::AdaptiveDriftControlRequest *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;
